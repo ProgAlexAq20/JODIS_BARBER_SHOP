@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jodi's Barbershop — Jd. Imperador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   VARIABLES & RESET
+   ============================================================ */
+:root {
+  --black:     #0B0B0B;
+  --dark:      #121212;
+  --card:      #1A1A1A;
+  --wood-deep: #3B2A1F;
+  --wood:      #4A3426;
+  --gold-soft: #B08D57;
+  --gold:      #D4AF37;
+  --white:     #F5F5F5;
+  --muted:     #B8B8B8;
+  --red:       #A11217;
+  --gold-glow: rgba(212,175,55,0.10);
+  --gold-line: rgba(212,175,55,0.22);
+  --border:    rgba(176,141,87,0.16);
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 2.5rem;
+  background: rgba(11,11,11,0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: padding 0.3s;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  font-style: italic;
+}
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-btn { display:flex; align-items:center; gap:0.7rem; }
+.nav-area-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.48rem 1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Barlow', sans-serif;
+  transition: all 0.2s;
+}
+.nav-area-btn:hover { border-color: var(--gold-soft); color: var(--gold-soft); }
+.nav-cta {
+  background: var(--gold);
+  color: var(--black);
+  padding: 0.52rem 1.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: 'Barlow', sans-serif;
+}
+.nav-cta:hover { background: var(--white); }
+
+/* mobile nav */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--gold);
+  transition: all 0.3s;
+}
+
+/* ============================================================
+   SCREENS
+   ============================================================ */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: block; }
+#screen-login.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   HERO — VIDEO
+   ============================================================ */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.hero-video-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero-video-wrap video,
+.hero-video-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.hero-video-wrap video { position: absolute; inset: 0; }
+.hero-video-fallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, var(--wood-deep) 0%, var(--black) 70%);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+/* layered overlay: bottom dark + grain effect */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      rgba(11,11,11,0.55) 0%,
+      rgba(11,11,11,0.25) 40%,
+      rgba(11,11,11,0.72) 100%),
+    linear-gradient(to right,
+      rgba(11,11,11,0.7) 0%,
+      transparent 60%);
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 9rem 2.5rem 5rem;
+  width: 100%;
+}
+.hero-location-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(212,175,55,0.08);
+  border: 1px solid var(--gold-line);
+  color: var(--gold);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1.8rem;
+}
+.hero-location-tag::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3.2rem, 7vw, 6rem);
+  line-height: 1.0;
+  font-weight: 900;
+  margin-bottom: 1.6rem;
+  color: var(--white);
+  max-width: 700px;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+}
+.hero-title em {
+  color: var(--gold);
+  font-style: italic;
+}
+.hero-rule {
+  width: 48px;
+  height: 1px;
+  background: var(--gold);
+  margin-bottom: 1.6rem;
+}
+.hero-sub {
+  color: rgba(245,245,245,0.82);
+  font-size: 1rem;
+  line-height: 1.85;
+  max-width: 500px;
+  margin-bottom: 2.8rem;
+  font-weight: 300;
+}
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--gold-line);
+  max-width: 340px;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--gold);
+  font-weight: 700;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn-primary {
+  background: var(--gold);
+  color: var(--black);
+  padding: 0.95rem 2.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Barlow', sans-serif;
+}
+.btn-primary:hover { background: var(--white); transform: translateY(-1px); }
+.btn-secondary {
+  background: transparent;
+  color: var(--white);
+  padding: 0.95rem 2.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border: 1px solid var(--gold-line);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Barlow', sans-serif;
+}
+.btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.section {
+  padding: 6rem 2.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.section-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  margin-bottom: 3rem;
+}
+.gold-divider { width: 60px; height: 1px; background: var(--gold); margin: 0 0 2rem; }
+
+/* ============================================================
+   CARROSSEL — A EXPERIÊNCIA JODI'S
+   ============================================================ */
+#gallery {
+  background: var(--dark);
+  padding: 6rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.gallery-head {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2.5rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.gallery-nav-btns {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+.carousel-btn {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gold);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.carousel-btn:hover { border-color: var(--gold); background: var(--gold-glow); }
+.carousel-track-outer {
+  overflow: hidden;
+  padding: 0 2.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+.carousel-track {
+  display: flex;
+  gap: 1.2rem;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+.carousel-slide {
+  flex: 0 0 calc(33.33% - 0.8rem);
+  position: relative;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--card);
+}
+.carousel-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(11,11,11,0.75) 0%, transparent 50%);
+  z-index: 1;
+  transition: opacity 0.3s;
+}
+.carousel-slide:hover::after { opacity: 0.5; }
+.carousel-slide img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+  background: linear-gradient(160deg, var(--wood-deep), var(--black));
+}
+.carousel-slide:hover img { transform: scale(1.04); }
+.slide-img-placeholder {
+  width: 100%;
+  aspect-ratio: 4/5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.7rem;
+  color: rgba(176,141,87,0.3);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.slide-img-placeholder span { font-size: 2rem; opacity: 0.3; }
+.slide-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  padding: 1.2rem 1.2rem 1rem;
+}
+.slide-caption-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  color: var(--white);
+  font-style: italic;
+  opacity: 0.9;
+}
+.slide-caption-sub {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin-top: 0.2rem;
+}
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.8rem;
+}
+.indicator {
+  width: 24px;
+  height: 2px;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 0;
+}
+.indicator.active {
+  width: 48px;
+  background: var(--gold);
+}
+
+/* ============================================================
+   SERVICES
+   ============================================================ */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1px;
+  background: var(--border);
+}
+.service-card {
+  background: var(--dark);
+  padding: 2.5rem 2rem;
+  transition: background 0.3s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.service-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+.service-card:hover { background: var(--card); }
+.service-card:hover::after { transform: scaleX(1); }
+.service-icon { font-size: 1.4rem; margin-bottom: 1.4rem; color: var(--gold-soft); }
+.service-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; margin-bottom: 0.5rem; }
+.service-desc { color: var(--muted); font-size: 0.83rem; line-height: 1.75; margin-bottom: 1.4rem; }
+.service-price { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; color: var(--gold); font-weight: 500; letter-spacing: 0.05em; }
+
+/* ============================================================
+   BARBERS
+   ============================================================ */
+.barbers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+.barber-card {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: border-color 0.3s;
+  cursor: pointer;
+}
+.barber-card:hover { border-color: var(--gold-soft); }
+.barber-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--wood), var(--wood-deep));
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--gold);
+  border: 2px solid var(--gold-line);
+}
+.barber-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.3rem; }
+.barber-role { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-soft); margin-bottom: 0.8rem; }
+.barber-rating { font-size: 0.8rem; color: var(--muted); }
+.barber-rating span { color: var(--gold); }
+
+/* ============================================================
+   CTA STRIP
+   ============================================================ */
+.cta-strip {
+  background: var(--wood-deep);
+  padding: 5rem 2.5rem;
+  text-align: center;
+  border-top: 1px solid var(--gold-line);
+}
+
+/* ============================================================
+   BOOKING SCREEN
+   ============================================================ */
+#screen-booking { padding-top: 5rem; }
+.booking-wrap { max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }
+.booking-steps {
+  display: flex;
+  gap: 0;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.booking-steps::-webkit-scrollbar { display: none; }
+.step-tab {
+  padding: 1rem 1.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.step-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.booking-block { display: none; }
+.booking-block.active { display: block; }
+.booking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.booking-option {
+  background: var(--dark);
+  border: 1px solid var(--border);
+  padding: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.booking-option:hover, .booking-option.selected {
+  border-color: var(--gold);
+  background: var(--gold-glow);
+}
+.booking-option.selected .opt-name { color: var(--gold); }
+.opt-name { font-family: 'Playfair Display', serif; font-size: 0.95rem; margin-bottom: 0.3rem; }
+.opt-meta { font-size: 0.72rem; color: var(--muted); }
+.calendar-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+.calendar { background: var(--dark); border: 1px solid var(--border); padding: 1.5rem; }
+.cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.cal-month { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+.cal-nav { background: none; border: 1px solid var(--border); color: var(--muted); width: 30px; height: 30px; cursor: pointer; font-size: 1rem; }
+.cal-nav:hover { border-color: var(--gold); color: var(--gold); }
+.cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 0.5rem; }
+.cal-day-label { font-size: 0.62rem; text-align: center; color: var(--muted); letter-spacing: 0.04em; padding: 0.3rem 0; }
+.cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+.cal-day:hover { border-color: var(--gold-line); color: var(--gold); }
+.cal-day.selected { background: var(--gold); color: var(--black); font-weight: 600; }
+.cal-day.disabled { color: rgba(184,184,184,0.22); cursor: default; pointer-events: none; }
+.cal-day.today { border-color: var(--gold-soft); }
+.time-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
+.time-slot { background: var(--dark); border: 1px solid var(--border); padding: 0.7rem; text-align: center; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; }
+.time-slot:hover, .time-slot.selected { background: var(--gold-glow); border-color: var(--gold); color: var(--gold); }
+.time-slot.unavailable { opacity: 0.28; cursor: default; pointer-events: none; }
+.form-field { margin-bottom: 1.5rem; }
+.form-label { display: block; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-soft); margin-bottom: 0.6rem; font-weight: 500; }
+.form-input { width: 100%; background: var(--dark); border: 1px solid var(--border); color: var(--white); padding: 0.9rem 1rem; font-size: 0.9rem; font-family: 'Barlow', sans-serif; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: var(--gold); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.booking-summary { background: var(--dark); border: 1px solid var(--border); padding: 2rem; margin-bottom: 2rem; }
+.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+.summary-row:last-child { border: none; padding-top: 1rem; }
+.summary-label { font-size: 0.8rem; color: var(--muted); }
+.summary-value { font-size: 0.85rem; color: var(--white); }
+.summary-total .summary-label { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--white); }
+.summary-total .summary-value { color: var(--gold); font-size: 1.2rem; font-family: 'Barlow Condensed', sans-serif; }
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+#screen-login {
+  min-height: 100vh;
+  padding-top: 4rem;
+  background: radial-gradient(ellipse at 50% 0%, var(--wood-deep) 0%, var(--black) 60%);
+}
+.login-card { width: 100%; max-width: 440px; padding: 3rem; background: var(--dark); border: 1px solid var(--border); }
+.login-logo { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--gold); margin-bottom: 0.5rem; font-style: italic; }
+.login-sub { color: var(--muted); font-size: 0.83rem; margin-bottom: 2.5rem; }
+.login-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+.login-tab {
+  padding: 0.8rem 1.2rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: 'Barlow', sans-serif;
+}
+.login-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ============================================================
+   DASHBOARD SHARED
+   ============================================================ */
+#screen-barber-dash { padding-top: 4rem; }
+.dash-wrap { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.sidebar {
+  background: var(--dark);
+  border-right: 1px solid var(--border);
+  padding: 2rem 0;
+  position: sticky;
+  top: 4rem;
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+.sidebar-user { padding: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+.sidebar-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--wood), var(--gold-soft));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--black);
+  margin-bottom: 0.8rem;
+  border: 2px solid var(--gold-line);
+}
+.sidebar-name { font-family: 'Playfair Display', serif; font-size: 0.95rem; }
+.sidebar-role { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-soft); }
+.sidebar-nav { list-style: none; padding: 0 0.8rem; }
+.sidebar-nav li { margin-bottom: 0.2rem; }
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+  border-left: 2px solid transparent;
+}
+.sidebar-nav a:hover, .sidebar-nav a.active { color: var(--white); background: var(--gold-glow); border-left-color: var(--gold); }
+.sidebar-nav a.active { color: var(--gold); }
+.sidebar-nav .nav-icon { font-size: 0.88rem; opacity: 0.7; }
+.sidebar-section { padding: 0.5rem 1.5rem; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(184,184,184,0.3); margin-top: 1rem; margin-bottom: 0.2rem; }
+.dash-main { padding: 2.5rem; overflow-y: auto; }
+.dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem; }
+.dash-greeting { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; }
+.dash-date { font-size: 0.78rem; color: var(--muted); }
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.kpi { background: var(--dark); border: 1px solid var(--border); padding: 1.5rem; position: relative; overflow: hidden; }
+.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--gold), transparent); }
+.kpi-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; }
+.kpi-value { font-family: 'Barlow Condensed', sans-serif; font-size: 1.8rem; color: var(--gold); font-weight: 500; letter-spacing: 0.02em; }
+.kpi-change { font-size: 0.7rem; color: var(--gold-soft); margin-top: 0.3rem; }
+.kpi-change.neg { color: var(--red); }
+.dash-grid { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; }
+.dash-card { background: var(--dark); border: 1px solid var(--border); padding: 1.5rem; }
+.dash-card-title { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+.dash-card-title a { font-size: 0.7rem; font-family: 'Barlow', sans-serif; color: var(--gold-soft); text-decoration: none; letter-spacing: 0.04em; }
+.appointment-list { display: flex; flex-direction: column; gap: 0.8rem; }
+.appt { display: grid; grid-template-columns: 60px 1fr auto; gap: 1rem; align-items: center; padding: 1rem; background: var(--card); border: 1px solid transparent; transition: border-color 0.2s; cursor: pointer; }
+.appt:hover { border-color: var(--border); }
+.appt-time { text-align: center; }
+.appt-hour { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; color: var(--gold); font-weight: 500; }
+.appt-period { font-size: 0.62rem; color: var(--muted); letter-spacing: 0.04em; }
+.appt-client { font-size: 0.87rem; margin-bottom: 0.2rem; }
+.appt-service { font-size: 0.7rem; color: var(--muted); }
+.appt-status { font-size: 0.62rem; letter-spacing: 0.08em; padding: 0.3rem 0.7rem; text-transform: uppercase; font-weight: 500; white-space: nowrap; }
+.status-confirmed { background: rgba(212,175,55,0.12); color: var(--gold); }
+.status-waiting { background: rgba(184,184,184,0.1); color: var(--muted); }
+.status-done { background: rgba(59,42,31,0.5); color: var(--gold-soft); }
+.quick-actions { display: flex; flex-direction: column; gap: 0.6rem; }
+.quick-action { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1rem; background: var(--card); border: none; color: var(--muted); cursor: pointer; font-size: 0.78rem; font-family: 'Barlow', sans-serif; text-align: left; transition: color 0.2s; }
+.quick-action:hover { color: var(--gold); }
+
+/* ============================================================
+   ADMIN DASHBOARD
+   ============================================================ */
+#screen-admin-dash { padding-top: 4rem; }
+.admin-wrap { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+.admin-sidebar { background: var(--wood-deep); border-right: 1px solid rgba(212,175,55,0.12); padding: 2rem 0; }
+.revenue-chart { height: 180px; display: flex; align-items: flex-end; gap: 4px; padding: 0 0.5rem; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar { background: linear-gradient(0deg, var(--gold-soft), var(--gold)); border-radius: 2px 2px 0 0; width: 100%; transition: opacity 0.2s; cursor: pointer; }
+.bar:hover { opacity: 0.8; }
+.bar-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.04em; }
+.revenue-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.revenue-card { background: var(--card); border: 1px solid var(--border); padding: 1.5rem; }
+.revenue-label { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+.revenue-value { font-family: 'Barlow Condensed', sans-serif; font-size: 2rem; color: var(--gold); font-weight: 500; }
+.revenue-sub { font-size: 0.7rem; color: var(--gold-soft); margin-top: 0.3rem; }
+.team-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.team-row { display: grid; grid-template-columns: 40px 1fr auto auto; gap: 1rem; align-items: center; padding: 0.8rem; background: var(--card); }
+.team-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--wood), var(--gold-soft)); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; color: var(--black); font-weight: 600; }
+.team-name { font-size: 0.85rem; }
+.team-role { font-size: 0.68rem; color: var(--muted); }
+.team-appts { font-size: 0.75rem; color: var(--muted); text-align: right; }
+.team-revenue { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; color: var(--gold); text-align: right; }
+
+/* ============================================================
+   PLACEHOLDER SCREENS
+   ============================================================ */
+.placeholder-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; }
+.placeholder-icon { font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.25; }
+.placeholder-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--muted); margin-bottom: 0.5rem; }
+.placeholder-msg { font-size: 0.85rem; color: rgba(184,184,184,0.45); max-width: 300px; }
+
+/* ============================================================
+   TAGS / UTIL
+   ============================================================ */
+.gold-tag { display: inline-block; background: var(--gold-glow); border: 1px solid var(--gold-line); color: var(--gold); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.7rem; font-weight: 500; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast { position: fixed; bottom: 2rem; right: 2rem; background: var(--dark); border: 1px solid var(--gold); color: var(--gold); padding: 1rem 1.5rem; font-size: 0.82rem; z-index: 9999; animation: slideUp 0.3s ease; display: none; font-family: 'Barlow', sans-serif; max-width: calc(100vw - 4rem); }
+.toast.show { display: block; }
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+.screen { animation: fadeIn 0.35s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ============================================================
+   MOBILE RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* NAV */
+  nav { padding: 1rem 1.2rem; }
+  .nav-links { display: none; }
+  .nav-area-btn { display: none; } /* oculta "Área Restrita" no mobile */
+  .nav-hamburger { display: flex; }
+
+  /* HERO */
+  .hero-content { padding: 7rem 1.4rem 3.5rem; }
+  .hero-title { font-size: clamp(2.6rem, 10vw, 4rem); }
+  .hero-sub { font-size: 0.95rem; }
+  .hero-actions { flex-direction: column; }
+  .hero-actions .btn-primary,
+  .hero-actions .btn-secondary { width: 100%; text-align: center; padding: 1rem; }
+  .hero-stats { gap: 2rem; }
+
+  /* CAROUSEL */
+  .carousel-slide { flex: 0 0 80%; }
+  .carousel-track-outer { padding: 0 1.2rem; }
+  .gallery-head { padding: 0 1.2rem; flex-direction: column; align-items: flex-start; }
+
+  /* SECTION */
+  .section { padding: 4rem 1.4rem; }
+
+  /* BOOKING */
+  .booking-wrap { padding: 3rem 1.2rem; }
+  .booking-grid { grid-template-columns: 1fr 1fr; }
+  .calendar-wrap { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+
+  /* DASHBOARD */
+  .dash-wrap, .admin-wrap { grid-template-columns: 1fr; }
+  .sidebar, .admin-sidebar {
+    position: static;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar,
+  .admin-sidebar::-webkit-scrollbar { display: none; }
+  .sidebar-user { display: none; }
+  .sidebar-nav,
+  .admin-sidebar ul {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    gap: 0;
+    white-space: nowrap;
+  }
+  .sidebar-nav li,
+  .admin-sidebar ul li { margin: 0; }
+  .sidebar-nav a,
+  .admin-sidebar ul a {
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.9rem 1rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .sidebar-nav a:hover,
+  .sidebar-nav a.active,
+  .admin-sidebar ul a:hover,
+  .admin-sidebar ul a.active {
+    border-left: none;
+    border-bottom-color: var(--gold);
+  }
+  .sidebar-section { display: none; }
+  .admin-sidebar > div:first-child { display: none; } /* admin logo hidden on mobile */
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .revenue-row { grid-template-columns: 1fr; }
+  .dash-main { padding: 1.5rem 1.2rem; }
+  .team-row { grid-template-columns: 36px 1fr auto; }
+  .team-appts { display: none; }
+
+  /* LOGIN */
+  .login-card { margin: 0 1.2rem; padding: 2rem 1.5rem; }
+
+  /* BUTTONS */
+  .btn-primary, .btn-secondary { padding: 0.9rem 1.8rem; }
+
+  /* CTA */
+  .cta-strip { padding: 4rem 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(2.3rem, 12vw, 3.2rem); }
+  .booking-grid { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  .kpi { padding: 1.1rem; }
+  .kpi-value { font-size: 1.4rem; }
+  .appt { grid-template-columns: 50px 1fr auto; gap: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAV
+     ============================================================ -->
+<nav>
+  <div class="nav-logo" onclick="showScreen('landing')">Jodi's</div>
+  <ul class="nav-links">
+    <li><a href="#" onclick="scrollSection('services')">Serviços</a></li>
+    <li><a href="#" onclick="scrollSection('barbers')">Barbeiros</a></li>
+    <li><a href="#" onclick="scrollSection('gallery')">Galeria</a></li>
+    <li><a href="#" onclick="showScreen('booking')">Agendar</a></li>
+  </ul>
+  <div class="nav-btn">
+    <button class="nav-area-btn" onclick="showScreen('login')">Área Restrita</button>
+    <button class="nav-cta" onclick="showScreen('booking')">Reservar Horário</button>
+    <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div id="mobile-menu" style="display:none;position:fixed;inset:0;z-index:150;background:rgba(11,11,11,0.97);padding:6rem 2rem 2rem;flex-direction:column;gap:0;">
+  <button onclick="toggleMobileMenu()" style="position:absolute;top:1.2rem;right:1.4rem;background:none;border:none;color:var(--gold);font-size:1.5rem;cursor:pointer;">✕</button>
+  <nav style="display:flex;flex-direction:column;gap:0;border-top:1px solid var(--border);">
+    <a href="#" onclick="scrollSection('services');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border);transition:color 0.2s;">Serviços</a>
+    <a href="#" onclick="scrollSection('barbers');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border);">Barbeiros</a>
+    <a href="#" onclick="scrollSection('gallery');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border);">Galeria</a>
+    <a href="#" onclick="showScreen('booking');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--border);">Agendar</a>
+    <a href="#" onclick="showScreen('login');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;">Área Restrita</a>
+  </nav>
+  <button class="btn-primary" style="margin-top:2rem;width:100%;" onclick="showScreen('booking');toggleMobileMenu();">Reservar Meu Horário</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     LANDING
+     ============================================================ -->
+<div id="screen-landing" class="screen active">
+
+  <!-- HERO WITH VIDEO -->
+  <section id="hero">
+    <div class="hero-video-wrap">
+      <!-- Fallback colorido caso o vídeo não carregue -->
+      <div class="hero-video-fallback"></div>
+      <!--
+        VIDEO PRINCIPAL
+        Arquivo: assets/jodi-hero.mp4
+        Poster fallback: assets/jodi-poster.jpg
+        Resolução recomendada: 1920×1080 (landscape) ou 1080×1350 (portrait para mobile)
+        Formato: MP4 H.264, máx 15MB para carregamento rápido
+      -->
+      <video
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="./assets/jodi-poster.jpg"
+        preload="auto"
+        aria-hidden="true"
+      >
+        <source src="./assets/jodi-hero.mp4" type="video/mp4">
+        <!-- fallback: sem vídeo = poster via CSS background -->
+      </video>
+    </div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <div class="hero-location-tag">Jd. Imperador · São Paulo</div>
+      <h1 class="hero-title">
+        Estilo,<br>Precisão<br>e <em>Presença.</em>
+      </h1>
+      <div class="hero-rule"></div>
+      <p class="hero-sub">Seu próximo visual começa aqui. Corte, barba e experiência no padrão premium — direto no Jardim Imperador.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showScreen('booking')">Reservar Meu Horário</button>
+        <button class="btn-secondary" onclick="scrollSection('services')">Ver Serviços</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num">8+</div>
+          <div class="stat-label">Anos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">2k+</div>
+          <div class="stat-label">Clientes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">4.9</div>
+          <div class="stat-label">Avaliação</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services" style="background:var(--dark);padding:6rem 0;">
+    <div class="section">
+      <p class="section-label">O que oferecemos</p>
+      <h2 class="section-title">Serviços Premium</h2>
+      <div class="services-grid">
+        <div class="service-card"><div class="service-icon">✂</div><div class="service-name">Corte Clássico</div><div class="service-desc">Corte personalizado com acabamento impecável. Cada detalhe executado com maestria.</div><div class="service-price">R$ 75</div></div>
+        <div class="service-card"><div class="service-icon">◈</div><div class="service-name">Barba Completa</div><div class="service-desc">Modelagem, hidratação e finalização com produtos premium selecionados.</div><div class="service-price">R$ 55</div></div>
+        <div class="service-card"><div class="service-icon">◉</div><div class="service-name">Corte + Barba</div><div class="service-desc">O combo exclusivo Jodi's. Transformação completa, do cabelo à barba.</div><div class="service-price">R$ 120</div></div>
+        <div class="service-card"><div class="service-icon">◇</div><div class="service-name">Tratamento Capilar</div><div class="service-desc">Hidratação profunda e cuidado intensivo para cabelos e couro cabeludo.</div><div class="service-price">R$ 90</div></div>
+        <div class="service-card"><div class="service-icon">⬡</div><div class="service-name">Sobrancelha</div><div class="service-desc">Design e alinhamento para um visual definido e expressivo.</div><div class="service-price">R$ 30</div></div>
+        <div class="service-card"><div class="service-icon">◆</div><div class="service-name">Experiência VIP</div><div class="service-desc">Corte + Barba + Tratamento + Barbeação a navalha. A experiência definitiva.</div><div class="service-price">R$ 200</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARROSSEL — A EXPERIÊNCIA JODI'S -->
+  <section id="gallery">
+    <div class="gallery-head">
+      <div>
+        <p class="section-label">Por dentro da Jodi's</p>
+        <h2 class="section-title" style="margin-bottom:0;">Cortes, Ambiente &amp; Estilo</h2>
+      </div>
+      <div class="gallery-nav-btns">
+        <button class="carousel-btn" id="carousel-prev" onclick="carouselMove(-1)" aria-label="Anterior">&#8592;</button>
+        <button class="carousel-btn" id="carousel-next" onclick="carouselMove(1)" aria-label="Próximo">&#8594;</button>
+      </div>
+    </div>
+
+    <div class="carousel-track-outer">
+      <div class="carousel-track" id="carousel-track">
+
+        <!--
+          FOTOS DO CARROSSEL
+          Cada slide usa: assets/NOME-DO-ARQUIVO.jpg
+          Se a imagem não existir, mostra placeholder dourado.
+          Substituição: coloque o arquivo com o nome exato na pasta assets/
+        -->
+
+        <div class="carousel-slide" onclick="showScreen('booking')">
+          <img
+            src="./assets/ambiente-01.jpg"
+            alt="Ambiente da Jodi's Barbershop"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="slide-img-placeholder" style="display:none;">
+            <span>✦</span>ambiente-01.jpg
+          </div>
+          <div class="slide-caption">
+            <div class="slide-caption-text">O ambiente da Jodi's</div>
+            <div class="slide-caption-sub">Jd. Imperador</div>
+          </div>
+        </div>
+
+        <div class="carousel-slide" onclick="showScreen('booking')">
+          <img
+            src="./assets/cliente-corte-01.jpg"
+            alt="Corte premium"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="slide-img-placeholder" style="display:none;">
+            <span>✂</span>cliente-corte-01.jpg
+          </div>
+          <div class="slide-caption">
+            <div class="slide-caption-text">Corte de precisão</div>
+            <div class="slide-caption-sub">Master Barber · Jodi</div>
+          </div>
+        </div>
+
+        <div class="carousel-slide" onclick="showScreen('booking')">
+          <img
+            src="./assets/barbearia-01.jpg"
+            alt="Barbearia"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="slide-img-placeholder" style="display:none;">
+            <span>◈</span>barbearia-01.jpg
+          </div>
+          <div class="slide-caption">
+            <div class="slide-caption-text">Tradição e elegância</div>
+            <div class="slide-caption-sub">Desde 2016</div>
+          </div>
+        </div>
+
+        <div class="carousel-slide" onclick="showScreen('booking')">
+          <img
+            src="./assets/cliente-corte-02.jpg"
+            alt="Barba completa"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="slide-img-placeholder" style="display:none;">
+            <span>◉</span>cliente-corte-02.jpg
+          </div>
+          <div class="slide-caption">
+            <div class="slide-caption-text">Barba impecável</div>
+            <div class="slide-caption-sub">Modelagem premium</div>
+          </div>
+        </div>
+
+        <div class="carousel-slide" onclick="showScreen('booking')">
+          <img
+            src="./assets/barbearia-02.jpg"
+            alt="Produtos e ferramentas"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="slide-img-placeholder" style="display:none;">
+            <span>◇</span>barbearia-02.jpg
+          </div>
+          <div class="slide-caption">
+            <div class="slide-caption-text">Ferramentas de precisão</div>
+            <div class="slide-caption-sub">Qualidade em cada detalhe</div>
+          </div>
+        </div>
+
+        <div class="carousel-slide" onclick="showScreen('booking')">
+          <img
+            src="./assets/cliente-corte-03.jpg"
+            alt="Resultado final"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+          >
+          <div class="slide-img-placeholder" style="display:none;">
+            <span>✦</span>cliente-corte-03.jpg
+          </div>
+          <div class="slide-caption">
+            <div class="slide-caption-text">O resultado que você merece</div>
+            <div class="slide-caption-sub">Experiência VIP</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="carousel-indicators" id="carousel-indicators"></div>
+  </section>
+
+  <!-- BARBERS -->
+  <section id="barbers" style="padding:6rem 0;">
+    <div class="section">
+      <p class="section-label">Nossa equipe</p>
+      <h2 class="section-title">Os Artistas</h2>
+      <div class="barbers-grid">
+        <div class="barber-card" onclick="showScreen('booking')">
+          <div class="barber-avatar">JD</div>
+          <div class="barber-name">Jodi</div>
+          <div class="barber-role">Master Barber · Fundador</div>
+          <div class="barber-rating"><span>★★★★★</span> 4.9 (847)</div>
+        </div>
+        <div class="barber-card" onclick="showScreen('booking')">
+          <div class="barber-avatar">MR</div>
+          <div class="barber-name">Marcus</div>
+          <div class="barber-role">Senior Barber</div>
+          <div class="barber-rating"><span>★★★★★</span> 4.8 (521)</div>
+        </div>
+        <div class="barber-card" onclick="showScreen('booking')">
+          <div class="barber-avatar">LF</div>
+          <div class="barber-name">Lucas</div>
+          <div class="barber-role">Barber Specialist</div>
+          <div class="barber-rating"><span>★★★★★</span> 4.9 (389)</div>
+        </div>
+        <div class="barber-card" onclick="showScreen('booking')">
+          <div class="barber-avatar">AT</div>
+          <div class="barber-name">André</div>
+          <div class="barber-role">Color &amp; Style</div>
+          <div class="barber-rating"><span>★★★★☆</span> 4.7 (214)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA STRIP -->
+  <section class="cta-strip">
+    <p class="section-label" style="text-align:center;">Pronto para o próximo nível?</p>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.8rem);margin-bottom:2rem;">Reserve o Seu Horário na Jodi's</h2>
+    <button class="btn-primary" style="font-size:0.88rem;padding:1.1rem 3rem;" onclick="showScreen('booking')">Reservar Agora</button>
+  </section>
+
+</div><!-- /screen-landing -->
+
+<!-- ============================================================
+     BOOKING
+     ============================================================ -->
+<div id="screen-booking" class="screen">
+  <div class="booking-wrap">
+    <p style="font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">Agendamento</p>
+    <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:2.5rem;">Reserve Seu Horário</h1>
+    <div class="booking-steps">
+      <div class="step-tab active" id="tab-1" onclick="bookStep(1)">1. Serviço</div>
+      <div class="step-tab" id="tab-2" onclick="bookStep(2)">2. Barbeiro</div>
+      <div class="step-tab" id="tab-3" onclick="bookStep(3)">3. Data &amp; Hora</div>
+      <div class="step-tab" id="tab-4" onclick="bookStep(4)">4. Confirmação</div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="booking-block active" id="block-1">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1.5rem;">Escolha o Serviço</h3>
+      <div class="booking-grid">
+        <div class="booking-option selected" onclick="selectOpt(this,'service','Corte Clássico')"><div class="opt-name">Corte Clássico</div><div class="opt-meta">45 min · R$ 75</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'service','Barba Completa')"><div class="opt-name">Barba Completa</div><div class="opt-meta">30 min · R$ 55</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'service','Corte + Barba')"><div class="opt-name">Corte + Barba</div><div class="opt-meta">70 min · R$ 120</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'service','Tratamento Capilar')"><div class="opt-name">Tratamento Capilar</div><div class="opt-meta">60 min · R$ 90</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'service','Sobrancelha')"><div class="opt-name">Sobrancelha</div><div class="opt-meta">15 min · R$ 30</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'service','Experiência VIP')"><div class="opt-name">Experiência VIP</div><div class="opt-meta">120 min · R$ 200</div></div>
+      </div>
+      <button class="btn-primary" style="width:100%;" onclick="bookStep(2)">Próximo →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="booking-block" id="block-2">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1.5rem;">Escolha o Barbeiro</h3>
+      <div class="booking-grid">
+        <div class="booking-option selected" onclick="selectOpt(this,'barber','Jodi')"><div class="opt-name">Jodi</div><div class="opt-meta">Master · ★4.9</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'barber','Marcus')"><div class="opt-name">Marcus</div><div class="opt-meta">Senior · ★4.8</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'barber','Lucas')"><div class="opt-name">Lucas</div><div class="opt-meta">Specialist · ★4.9</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'barber','André')"><div class="opt-name">André</div><div class="opt-meta">Color · ★4.7</div></div>
+        <div class="booking-option" onclick="selectOpt(this,'barber','Qualquer')"><div class="opt-name">Qualquer</div><div class="opt-meta">Primeiro disponível</div></div>
+      </div>
+      <div style="display:flex;gap:1rem;">
+        <button class="btn-secondary" onclick="bookStep(1)">← Voltar</button>
+        <button class="btn-primary" style="flex:1;" onclick="bookStep(3)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="booking-block" id="block-3">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1.5rem;">Data e Horário</h3>
+      <div class="calendar-wrap">
+        <div class="calendar">
+          <div class="cal-header">
+            <button class="cal-nav">‹</button>
+            <span class="cal-month">Maio 2025</span>
+            <button class="cal-nav">›</button>
+          </div>
+          <div class="cal-days">
+            <div class="cal-day-label">Dom</div><div class="cal-day-label">Seg</div><div class="cal-day-label">Ter</div><div class="cal-day-label">Qua</div><div class="cal-day-label">Qui</div><div class="cal-day-label">Sex</div><div class="cal-day-label">Sáb</div>
+            <div class="cal-day disabled">27</div><div class="cal-day disabled">28</div><div class="cal-day disabled">29</div><div class="cal-day disabled">30</div>
+            <div class="cal-day" onclick="selectDay(this)">1</div><div class="cal-day" onclick="selectDay(this)">2</div><div class="cal-day" onclick="selectDay(this)">3</div>
+            <div class="cal-day disabled">4</div>
+            <div class="cal-day" onclick="selectDay(this)">5</div><div class="cal-day" onclick="selectDay(this)">6</div><div class="cal-day" onclick="selectDay(this)">7</div><div class="cal-day" onclick="selectDay(this)">8</div><div class="cal-day today" onclick="selectDay(this)">9</div><div class="cal-day" onclick="selectDay(this)">10</div>
+            <div class="cal-day disabled">11</div>
+            <div class="cal-day" onclick="selectDay(this)">12</div><div class="cal-day" onclick="selectDay(this)">13</div><div class="cal-day selected" onclick="selectDay(this)">14</div><div class="cal-day" onclick="selectDay(this)">15</div><div class="cal-day" onclick="selectDay(this)">16</div><div class="cal-day" onclick="selectDay(this)">17</div>
+            <div class="cal-day disabled">18</div>
+            <div class="cal-day" onclick="selectDay(this)">19</div><div class="cal-day" onclick="selectDay(this)">20</div><div class="cal-day" onclick="selectDay(this)">21</div><div class="cal-day" onclick="selectDay(this)">22</div><div class="cal-day" onclick="selectDay(this)">23</div><div class="cal-day" onclick="selectDay(this)">24</div>
+            <div class="cal-day disabled">25</div>
+            <div class="cal-day" onclick="selectDay(this)">26</div><div class="cal-day" onclick="selectDay(this)">27</div><div class="cal-day" onclick="selectDay(this)">28</div><div class="cal-day" onclick="selectDay(this)">29</div><div class="cal-day" onclick="selectDay(this)">30</div><div class="cal-day" onclick="selectDay(this)">31</div>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:1rem;">Horários Disponíveis</p>
+          <div class="time-slots">
+            <div class="time-slot unavailable">09:00</div>
+            <div class="time-slot" onclick="selectTime(this)">09:30</div>
+            <div class="time-slot" onclick="selectTime(this)">10:00</div>
+            <div class="time-slot unavailable">10:30</div>
+            <div class="time-slot selected" onclick="selectTime(this)">11:00</div>
+            <div class="time-slot" onclick="selectTime(this)">11:30</div>
+            <div class="time-slot unavailable">12:00</div>
+            <div class="time-slot unavailable">12:30</div>
+            <div class="time-slot" onclick="selectTime(this)">13:00</div>
+            <div class="time-slot" onclick="selectTime(this)">14:00</div>
+            <div class="time-slot" onclick="selectTime(this)">14:30</div>
+            <div class="time-slot unavailable">15:00</div>
+            <div class="time-slot" onclick="selectTime(this)">15:30</div>
+            <div class="time-slot" onclick="selectTime(this)">16:00</div>
+            <div class="time-slot" onclick="selectTime(this)">17:00</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;margin-top:2rem;">
+        <button class="btn-secondary" onclick="bookStep(2)">← Voltar</button>
+        <button class="btn-primary" style="flex:1;" onclick="bookStep(4)">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="booking-block" id="block-4">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1.5rem;">Confirmar Agendamento</h3>
+      <div class="booking-summary">
+        <div class="summary-row"><span class="summary-label">Serviço</span><span class="summary-value" id="sum-service">Corte Clássico</span></div>
+        <div class="summary-row"><span class="summary-label">Barbeiro</span><span class="summary-value" id="sum-barber">Jodi</span></div>
+        <div class="summary-row"><span class="summary-label">Data</span><span class="summary-value">14 de Maio, 2025</span></div>
+        <div class="summary-row"><span class="summary-label">Horário</span><span class="summary-value">11:00</span></div>
+        <div class="summary-row"><span class="summary-label">Duração</span><span class="summary-value">45 min</span></div>
+        <div class="summary-row summary-total"><span class="summary-label">Total</span><span class="summary-value">R$ 75</span></div>
+      </div>
+      <div class="form-row" style="margin-bottom:1rem;">
+        <div class="form-field"><label class="form-label">Nome Completo</label><input class="form-input" type="text" placeholder="Seu nome" /></div>
+        <div class="form-field"><label class="form-label">Telefone</label><input class="form-input" type="tel" placeholder="(11) 99999-9999" /></div>
+      </div>
+      <div class="form-field"><label class="form-label">E-mail (opcional)</label><input class="form-input" type="email" placeholder="seu@email.com" /></div>
+      <div style="display:flex;gap:1rem;margin-top:1rem;">
+        <button class="btn-secondary" onclick="bookStep(3)">← Voltar</button>
+        <button class="btn-primary" style="flex:1;" onclick="confirmBooking()">Confirmar Agendamento ✓</button>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /screen-booking -->
+
+<!-- ============================================================
+     LOGIN
+     ============================================================ -->
+<div id="screen-login" class="screen">
+  <div class="login-card">
+    <div class="login-logo">Jodi's</div>
+    <p class="login-sub">Área restrita · Acesso exclusivo</p>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="setLoginTab(this,'barber')">Barbeiro</button>
+      <button class="login-tab" onclick="setLoginTab(this,'admin')">Admin</button>
+    </div>
+    <div class="form-field"><label class="form-label">E-mail</label><input class="form-input" type="email" placeholder="seu@jodis.com.br" /></div>
+    <div class="form-field"><label class="form-label">Senha</label><input class="form-input" type="password" placeholder="••••••••" /></div>
+    <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="doLogin()">Entrar</button>
+    <p style="text-align:center;margin-top:1.5rem;font-size:0.72rem;color:var(--muted);">Esqueceu a senha? <a href="#" style="color:var(--gold-soft);">Recuperar</a></p>
+  </div>
+</div><!-- /screen-login -->
+
+<!-- ============================================================
+     BARBER DASHBOARD
+     ============================================================ -->
+<div id="screen-barber-dash" class="screen">
+  <div class="dash-wrap">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">JD</div>
+        <div class="sidebar-name">Jodi</div>
+        <div class="sidebar-role">Master Barber</div>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" class="active"><span class="nav-icon">◈</span> Agenda</a></li>
+        <li><a href="#"><span class="nav-icon">◉</span> Minha Agenda</a></li>
+        <li><a href="#"><span class="nav-icon">◇</span> Clientes</a></li>
+        <div class="sidebar-section">Conta</div>
+        <li><a href="#"><span class="nav-icon">◆</span> Ganhos</a></li>
+        <li><a href="#"><span class="nav-icon">⬡</span> Config.</a></li>
+        <li><a href="#" onclick="showScreen('landing')"><span class="nav-icon">←</span> Sair</a></li>
+      </ul>
+    </aside>
+    <main class="dash-main">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-greeting">Bom dia, Jodi.</h1>
+          <p class="dash-date">Quarta-feira, 14 de Maio · 8 atendimentos hoje</p>
+        </div>
+        <button class="btn-primary" style="font-size:0.72rem;padding:0.65rem 1.4rem;">+ Novo Agendamento</button>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-label">Hoje</div><div class="kpi-value">8</div><div class="kpi-change">↑ 2 vs ontem</div></div>
+        <div class="kpi"><div class="kpi-label">Faturamento</div><div class="kpi-value">R$ 720</div><div class="kpi-change">↑ 12%</div></div>
+        <div class="kpi"><div class="kpi-label">Este Mês</div><div class="kpi-value">R$ 8.4k</div><div class="kpi-change">↑ 8%</div></div>
+        <div class="kpi"><div class="kpi-label">Avaliação</div><div class="kpi-value">4.9 ★</div><div class="kpi-change">127 reviews</div></div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-card-title">Agenda de Hoje <a href="#">Ver tudo →</a></div>
+          <div class="appointment-list">
+            <div class="appt"><div class="appt-time"><div class="appt-hour">09:30</div><div class="appt-period">AM</div></div><div><div class="appt-client">Carlos Mendes</div><div class="appt-service">Corte + Barba · 70min</div></div><div class="appt-status status-done">Concluído</div></div>
+            <div class="appt"><div class="appt-time"><div class="appt-hour">11:00</div><div class="appt-period">AM</div></div><div><div class="appt-client">Rafael Souza</div><div class="appt-service">Corte Clássico · 45min</div></div><div class="appt-status status-confirmed">Confirmado</div></div>
+            <div class="appt"><div class="appt-time"><div class="appt-hour">12:00</div><div class="appt-period">PM</div></div><div><div class="appt-client">Bruno Lima</div><div class="appt-service">Experiência VIP · 120min</div></div><div class="appt-status status-confirmed">Confirmado</div></div>
+            <div class="appt"><div class="appt-time"><div class="appt-hour">02:30</div><div class="appt-period">PM</div></div><div><div class="appt-client">Felipe Costa</div><div class="appt-service">Barba Completa · 30min</div></div><div class="appt-status status-waiting">Aguardando</div></div>
+            <div class="appt"><div class="appt-time"><div class="appt-hour">03:30</div><div class="appt-period">PM</div></div><div><div class="appt-client">André Martins</div><div class="appt-service">Corte Clássico · 45min</div></div><div class="appt-status status-waiting">Aguardando</div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1.5rem;">
+          <div class="dash-card">
+            <div class="dash-card-title">Ações Rápidas</div>
+            <div class="quick-actions">
+              <button class="quick-action">✦ Bloquear horário</button>
+              <button class="quick-action">✦ Adicionar cliente</button>
+              <button class="quick-action">✦ Ver histórico</button>
+              <button class="quick-action">✦ Solicitar folga</button>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">Próximos Dias</div>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;">
+              <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:0.5rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);">Qui 15</span><span>6 agendamentos</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:0.5rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);">Sex 16</span><span>9 agendamentos</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:0.5rem 0;"><span style="color:var(--muted);">Sáb 17</span><span style="color:var(--gold);">Completo</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div><!-- /screen-barber-dash -->
+
+<!-- ============================================================
+     ADMIN DASHBOARD
+     ============================================================ -->
+<div id="screen-admin-dash" class="screen">
+  <div class="admin-wrap">
+    <aside class="admin-sidebar">
+      <div style="padding:1.5rem;border-bottom:1px solid rgba(212,175,55,0.12);margin-bottom:1rem;">
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);margin-bottom:0.2rem;font-style:italic;">Jodi's</div>
+        <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-soft);">Painel Admin</div>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="#" class="active"><span class="nav-icon">◈</span> Visão Geral</a></li>
+        <li><a href="#" onclick="showPlaceholder('financeiro')"><span class="nav-icon">◉</span> Financeiro</a></li>
+        <li><a href="#" onclick="showPlaceholder('clientes')"><span class="nav-icon">◇</span> Clientes</a></li>
+        <li><a href="#" onclick="showPlaceholder('relatorios')"><span class="nav-icon">◆</span> Relatórios</a></li>
+        <li><a href="#" onclick="showPlaceholder('servicos')"><span class="nav-icon">⬡</span> Serviços</a></li>
+        <li><a href="#" onclick="showPlaceholder('equipe')"><span class="nav-icon">✦</span> Equipe</a></li>
+        <div class="sidebar-section">Sistema</div>
+        <li><a href="#" onclick="showPlaceholder('configuracoes')"><span class="nav-icon">◇</span> Config.</a></li>
+        <li><a href="#" onclick="showScreen('landing')"><span class="nav-icon">←</span> Sair</a></li>
+      </ul>
+    </aside>
+    <main class="dash-main" id="admin-main">
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-greeting">Visão Geral</h1>
+          <p class="dash-date">Maio 2025 · Atualizado agora</p>
+        </div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+          <button class="btn-secondary" style="font-size:0.7rem;padding:0.55rem 1.1rem;">↓ Exportar</button>
+          <button class="btn-primary" style="font-size:0.7rem;padding:0.55rem 1.1rem;">+ Relatório</button>
+        </div>
+      </div>
+      <div class="revenue-row">
+        <div class="revenue-card"><div class="revenue-label">Faturamento do Mês</div><div class="revenue-value">R$ 34.820</div><div class="revenue-sub">↑ 18% vs Abril</div></div>
+        <div class="revenue-card"><div class="revenue-label">Atendimentos</div><div class="revenue-value">412</div><div class="revenue-sub">↑ 24 vs Abril</div></div>
+        <div class="revenue-card"><div class="revenue-label">Ticket Médio</div><div class="revenue-value">R$ 84,50</div><div class="revenue-sub">↑ 6% vs Abril</div></div>
+      </div>
+      <div class="kpi-row" style="margin-bottom:2rem;">
+        <div class="kpi"><div class="kpi-label">Novos Clientes</div><div class="kpi-value">67</div><div class="kpi-change">↑ 15%</div></div>
+        <div class="kpi"><div class="kpi-label">Taxa de Retorno</div><div class="kpi-value">78%</div><div class="kpi-change">↑ 3pts</div></div>
+        <div class="kpi"><div class="kpi-label">No-show</div><div class="kpi-value">4.2%</div><div class="kpi-change neg">↑ 1pt</div></div>
+        <div class="kpi"><div class="kpi-label">Avaliação</div><div class="kpi-value">4.8 ★</div><div class="kpi-change">312 reviews</div></div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-card-title">Faturamento Semanal</div>
+          <div class="revenue-chart">
+            <div class="bar-wrap"><div class="bar" style="height:65%"></div><div class="bar-label">S2</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:80%"></div><div class="bar-label">S3</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:55%"></div><div class="bar-label">S4</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:90%"></div><div class="bar-label">S5</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:70%"></div><div class="bar-label">S6</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:85%"></div><div class="bar-label">S7</div></div>
+            <div class="bar-wrap"><div class="bar" style="height:100%"></div><div class="bar-label">S8</div></div>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">Serviços Mais Pedidos</div>
+          <div style="display:flex;flex-direction:column;gap:0.7rem;">
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.3rem;"><span>Corte + Barba</span><span style="color:var(--gold);">38%</span></div><div style="height:4px;background:var(--card);border-radius:2px;"><div style="width:38%;height:100%;background:var(--gold);border-radius:2px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.3rem;"><span>Corte Clássico</span><span style="color:var(--gold);">28%</span></div><div style="height:4px;background:var(--card);border-radius:2px;"><div style="width:28%;height:100%;background:var(--gold-soft);border-radius:2px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.3rem;"><span>Barba Completa</span><span style="color:var(--gold);">18%</span></div><div style="height:4px;background:var(--card);border-radius:2px;"><div style="width:18%;height:100%;background:var(--wood);border-radius:2px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.3rem;"><span>VIP</span><span style="color:var(--gold);">10%</span></div><div style="height:4px;background:var(--card);border-radius:2px;"><div style="width:10%;height:100%;background:var(--wood-deep);border-radius:2px;"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.3rem;"><span>Outros</span><span style="color:var(--gold);">6%</span></div><div style="height:4px;background:var(--card);border-radius:2px;"><div style="width:6%;height:100%;background:rgba(184,184,184,0.3);border-radius:2px;"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-card" style="margin-top:1.5rem;">
+        <div class="dash-card-title">Performance da Equipe</div>
+        <div class="team-list">
+          <div class="team-row"><div class="team-avatar">JD</div><div><div class="team-name">Jodi</div><div class="team-role">Master Barber</div></div><div class="team-appts"><div style="font-size:0.65rem;color:var(--muted);">Atend.</div><div>124</div></div><div class="team-revenue"><div style="font-size:0.65rem;color:var(--muted);">Fatur.</div>R$ 12.4k</div></div>
+          <div class="team-row"><div class="team-avatar">MR</div><div><div class="team-name">Marcus</div><div class="team-role">Senior Barber</div></div><div class="team-appts"><div style="font-size:0.65rem;color:var(--muted);">Atend.</div><div>98</div></div><div class="team-revenue"><div style="font-size:0.65rem;color:var(--muted);">Fatur.</div>R$ 9.1k</div></div>
+          <div class="team-row"><div class="team-avatar">LF</div><div><div class="team-name">Lucas</div><div class="team-role">Specialist</div></div><div class="team-appts"><div style="font-size:0.65rem;color:var(--muted);">Atend.</div><div>107</div></div><div class="team-revenue"><div style="font-size:0.65rem;color:var(--muted);">Fatur.</div>R$ 8.8k</div></div>
+          <div class="team-row"><div class="team-avatar">AT</div><div><div class="team-name">André</div><div class="team-role">Color &amp; Style</div></div><div class="team-appts"><div style="font-size:0.65rem;color:var(--muted);">Atend.</div><div>83</div></div><div class="team-revenue"><div style="font-size:0.65rem;color:var(--muted);">Fatur.</div>R$ 4.5k</div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div><!-- /screen-admin-dash -->
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ——————————————————————————————————
+// STATE
+// ——————————————————————————————————
+const state = {
+  selectedService: 'Corte Clássico',
+  selectedBarber:  'Jodi',
+  loginRole:       'barber'
+};
+
+// ——————————————————————————————————
+// SCREEN ROUTER — corrigido para manter flex no login
+// ——————————————————————————————————
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.style.display = 'none';
+    s.classList.remove('active');
+  });
+  const target = document.getElementById('screen-' + name);
+  if (!target) return;
+  // Login precisa de display:flex para centralizar
+  target.style.display = (name === 'login') ? 'flex' : 'block';
+  target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ——————————————————————————————————
+// SCROLL INTO SECTION
+// ——————————————————————————————————
+function scrollSection(id) {
+  showScreen('landing');
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }, 120);
+}
+
+// ——————————————————————————————————
+// MOBILE MENU
+// ——————————————————————————————————
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const isOpen = menu.style.display === 'flex';
+  menu.style.display = isOpen ? 'none' : 'flex';
+  document.body.style.overflow = isOpen ? '' : 'hidden';
+}
+
+// ——————————————————————————————————
+// BOOKING
+// ——————————————————————————————————
+function bookStep(n) {
+  document.querySelectorAll('.booking-block').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('block-' + n).classList.add('active');
+  document.getElementById('tab-' + n).classList.add('active');
+  if (n === 4) {
+    document.getElementById('sum-service').textContent = state.selectedService;
+    document.getElementById('sum-barber').textContent  = state.selectedBarber;
+  }
+}
+
+function selectOpt(el, type, value) {
+  el.parentElement.querySelectorAll('.booking-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  state[type === 'service' ? 'selectedService' : 'selectedBarber'] = value;
+}
+
+function selectDay(el) {
+  document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectTime(el) {
+  document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function confirmBooking() {
+  showToast('✓ Agendamento confirmado! Você receberá uma confirmação por SMS.');
+  setTimeout(() => showScreen('landing'), 2500);
+}
+
+// ——————————————————————————————————
+// LOGIN
+// ——————————————————————————————————
+function setLoginTab(el, role) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  state.loginRole = role;
+}
+
+function doLogin() {
+  if (state.loginRole === 'admin') {
+    showScreen('admin-dash');
+  } else {
+    showScreen('barber-dash');
+  }
+  showToast('Bem-vindo de volta, Jodi!');
+}
+
+// ——————————————————————————————————
+// ADMIN PLACEHOLDERS
+// ——————————————————————————————————
+const placeholderData = {
+  financeiro:    { icon: '◉', title: 'Financeiro',    msg: 'Fluxo de caixa, comissões e DRE integrados.' },
+  clientes:      { icon: '◇', title: 'Clientes',      msg: 'CRM completo com histórico e fidelidade.' },
+  relatorios:    { icon: '◆', title: 'Relatórios',    msg: 'Análises avançadas e exportação de dados.' },
+  servicos:      { icon: '⬡', title: 'Serviços',      msg: 'Catálogo, preços e pacotes configuráveis.' },
+  equipe:        { icon: '✦', title: 'Equipe',        msg: 'Gestão de barbeiros, horários e comissões.' },
+  configuracoes: { icon: '◇', title: 'Configurações', msg: 'Notificações, integrações e personalização.' }
+};
+
+function showPlaceholder(name) {
+  const d = placeholderData[name];
+  document.getElementById('admin-main').innerHTML = `
+    <div class="dash-header"><div><h1 class="dash-greeting">${d.title}</h1><p class="dash-date">Em breve disponível</p></div></div>
+    <div class="placeholder-screen">
+      <div class="placeholder-icon">${d.icon}</div>
+      <div class="placeholder-title">${d.title}</div>
+      <p class="placeholder-msg">${d.msg}<br><br>Módulo em desenvolvimento. Pronto para integração backend.</p>
+      <button class="btn-secondary" style="margin-top:2rem;" onclick="location.reload()">← Voltar ao painel</button>
+    </div>`;
+}
+
+// ——————————————————————————————————
+// TOAST
+// ——————————————————————————————————
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ——————————————————————————————————
+// CAROUSEL
+// ——————————————————————————————————
+(function initCarousel() {
+  const track      = document.getElementById('carousel-track');
+  const indicators = document.getElementById('carousel-indicators');
+  if (!track) return;
+
+  const slides     = track.querySelectorAll('.carousel-slide');
+  const total      = slides.length;
+  let current      = 0;
+  let autoTimer    = null;
+
+  // Calcula quantos slides aparecem de uma vez
+  function visibleCount() {
+    return window.innerWidth <= 768 ? 1 : 3;
+  }
+
+  // Máximo de posições distintas
+  function maxIndex() {
+    return Math.max(0, total - visibleCount());
+  }
+
+  // Constrói indicadores
+  function buildIndicators() {
+    indicators.innerHTML = '';
+    const count = maxIndex() + 1;
+    for (let i = 0; i < count; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'indicator' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+      btn.addEventListener('click', () => goTo(i));
+      indicators.appendChild(btn);
+    }
+  }
+
+  function goTo(index) {
+    current = Math.max(0, Math.min(index, maxIndex()));
+    // Calcula largura de cada slide + gap
+    const slideEl    = slides[0];
+    const slideW     = slideEl.offsetWidth;
+    const gap        = 19.2; // 1.2rem em px (aproximado)
+    const offsetPx   = current * (slideW + gap);
+    track.style.transform = `translateX(-${offsetPx}px)`;
+
+    // Atualiza indicadores
+    indicators.querySelectorAll('.indicator').forEach((ind, i) => {
+      ind.classList.toggle('active', i === current);
+    });
+  }
+
+  function carouselMove(dir) {
+    resetAuto();
+    goTo(current + dir);
+  }
+  window.carouselMove = carouselMove;
+
+  function startAuto() {
+    autoTimer = setInterval(() => {
+      const next = current >= maxIndex() ? 0 : current + 1;
+      goTo(next);
+    }, 4000);
+  }
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    startAuto();
+  }
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) carouselMove(diff > 0 ? 1 : -1);
+  }, { passive: true });
+
+  // Pausa no hover (desktop)
+  track.addEventListener('mouseenter', () => clearInterval(autoTimer));
+  track.addEventListener('mouseleave', startAuto);
+
+  // Rebuild on resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      buildIndicators();
+      goTo(Math.min(current, maxIndex()));
+    }, 200);
+  });
+
+  buildIndicators();
+  startAuto();
+})();
+</script>
+</body>
+</html>
