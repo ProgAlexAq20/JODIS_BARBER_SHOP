@@ -1310,13 +1310,13 @@ nav {
         <div class="sidebar-role">Master Barber</div>
       </div>
       <ul class="sidebar-nav">
-        <li><a href="#" class="active"><span class="nav-icon">◈</span> Agenda</a></li>
+        <li><a href="#"><span class="nav-icon">◈</span> Agenda</a></li>
         <li><a href="#"><span class="nav-icon">◉</span> Minha Agenda</a></li>
         <li><a href="#"><span class="nav-icon">◇</span> Clientes</a></li>
         <div class="sidebar-section">Conta</div>
         <li><a href="#"><span class="nav-icon">◆</span> Ganhos</a></li>
         <li><a href="#"><span class="nav-icon">⬡</span> Config.</a></li>
-        <li><a href="#" onclick="showScreen('landing')"><span class="nav-icon">←</span> Sair</a></li>
+        <li><a href="#" onclick="handleLogout(); return false;"><span class="nav-icon">←</span> Sair</a></li>
       </ul>
     </aside>
     <main class="dash-main">
@@ -1387,7 +1387,7 @@ nav {
         <li><a href="#" onclick="showPlaceholder('equipe')"><span class="nav-icon">✦</span> Equipe</a></li>
         <div class="sidebar-section">Sistema</div>
         <li><a href="#" onclick="showPlaceholder('configuracoes')"><span class="nav-icon">◇</span> Config.</a></li>
-        <li><a href="#" onclick="showScreen('landing')"><span class="nav-icon">←</span> Sair</a></li>
+        <li><a href="#" onclick="handleLogout(); return false;"><span class="nav-icon">←</span> Sair</a></li>
       </ul>
     </aside>
     <main class="dash-main" id="admin-main">
@@ -1599,6 +1599,30 @@ function bookStep(n) {
   buildIndicators();
   startAuto();
 })();
+
+// ——————————————————————————————————
+// ADMIN PLACEHOLDERS
+// ——————————————————————————————————
+const placeholderData = {
+  financeiro:    { icon: '◉', title: 'Financeiro',    msg: 'Fluxo de caixa, comissões e DRE integrados.' },
+  clientes:      { icon: '◇', title: 'Clientes',      msg: 'CRM completo com histórico e fidelidade.' },
+  relatorios:    { icon: '◆', title: 'Relatórios',    msg: 'Análises avançadas e exportação de dados.' },
+  servicos:      { icon: '⬡', title: 'Serviços',      msg: 'Catálogo, preços e pacotes configuráveis.' },
+  equipe:        { icon: '✦', title: 'Equipe',        msg: 'Gestão de barbeiros, horários e comissões.' },
+  configuracoes: { icon: '◇', title: 'Configurações', msg: 'Notificações, integrações e personalização.' }
+};
+
+function showPlaceholder(name) {
+  const d = placeholderData[name];
+  document.getElementById('admin-main').innerHTML = `
+    <div class="dash-header"><div><h1 class="dash-greeting">${d.title}</h1><p class="dash-date">Em breve disponível</p></div></div>
+    <div class="placeholder-screen">
+      <div class="placeholder-icon">${d.icon}</div>
+      <div class="placeholder-title">${d.title}</div>
+      <p class="placeholder-msg">${d.msg}<br><br>Módulo em desenvolvimento. Pronto para integração backend.</p>
+      <button class="btn-secondary" style="margin-top:2rem;" onclick="location.reload()">← Voltar ao painel</button>
+    </div>`;
+}
 </script>
 </body>
 </html>
