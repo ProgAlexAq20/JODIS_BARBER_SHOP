@@ -1267,10 +1267,10 @@ nav {
         <div class="summary-row summary-total"><span class="summary-label">Total</span><span class="summary-value">R$ 75</span></div>
       </div>
       <div class="form-row" style="margin-bottom:1rem;">
-        <div class="form-field"><label class="form-label">Nome Completo</label><input class="form-input" type="text" placeholder="Seu nome" /></div>
-        <div class="form-field"><label class="form-label">Telefone</label><input class="form-input" type="tel" placeholder="(11) 99999-9999" /></div>
+        <div class="form-field"><label class="form-label">Nome Completo</label><input id="client-name" class="form-input" type="text" placeholder="Seu nome" /></div>
+        <div class="form-field"><label class="form-label">Telefone</label><input id="client-phone" class="form-input" type="tel" placeholder="(11) 99999-9999" /></div>
       </div>
-      <div class="form-field"><label class="form-label">E-mail (opcional)</label><input class="form-input" type="email" placeholder="seu@email.com" /></div>
+      <div class="form-field"><label class="form-label">E-mail (opcional)</label><input id="client-email" class="form-input" type="email" placeholder="seu@email.com" /></div>
       <div style="display:flex;gap:1rem;margin-top:1rem;">
         <button class="btn-secondary" onclick="bookStep(3)">← Voltar</button>
         <button class="btn-primary" style="flex:1;" onclick="confirmBooking()">Confirmar Agendamento ✓</button>
@@ -1291,8 +1291,8 @@ nav {
       <button class="login-tab active" onclick="setLoginTab(this,'barber')">Barbeiro</button>
       <button class="login-tab" onclick="setLoginTab(this,'admin')">Admin</button>
     </div>
-    <div class="form-field"><label class="form-label">E-mail</label><input class="form-input" type="email" placeholder="seu@jodis.com.br" /></div>
-    <div class="form-field"><label class="form-label">Senha</label><input class="form-input" type="password" placeholder="••••••••" /></div>
+    <div class="form-field"><label class="form-label">E-mail</label><input id="login-email" class="form-input" type="email" placeholder="seu@jodis.com.br" /></div>
+    <div class="form-field"><label class="form-label">Senha</label><input id="login-password" class="form-input" type="password" placeholder="••••••••" /></div>
     <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="doLogin()">Entrar</button>
     <p style="text-align:center;margin-top:1.5rem;font-size:0.72rem;color:var(--muted);">Esqueceu a senha? <a href="#" style="color:var(--gold-soft);">Recuperar</a></p>
   </div>
@@ -1452,35 +1452,26 @@ nav {
 <!-- ============================================================
      JAVASCRIPT
      ============================================================ -->
+<!-- Firebase Module -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+  import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js';
+  import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+  
+  import config from './firebase-config.js';
+  
+  // Inicializa Firebase globalmente
+  window.firebaseApp = initializeApp(config.firebaseConfig);
+  window.auth = getAuth(window.firebaseApp);
+  window.db = getFirestore(window.firebaseApp);
+</script>
+
+<!-- App Logic -->
+<script type="module" src="./app.js"></script>
+
+<!-- Inline UI Functions (existentes) -->
 <script>
-// ——————————————————————————————————
-// STATE
-// ——————————————————————————————————
-const state = {
-  selectedService: 'Corte Clássico',
-  selectedBarber:  'Jodi',
-  loginRole:       'barber'
-};
-
-// ——————————————————————————————————
-// SCREEN ROUTER — corrigido para manter flex no login
-// ——————————————————————————————————
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.style.display = 'none';
-    s.classList.remove('active');
-  });
-  const target = document.getElementById('screen-' + name);
-  if (!target) return;
-  // Login precisa de display:flex para centralizar
-  target.style.display = (name === 'login') ? 'flex' : 'block';
-  target.classList.add('active');
-  window.scrollTo(0, 0);
-}
-
-// ——————————————————————————————————
-// SCROLL INTO SECTION
-// ——————————————————————————————————
+// Legacy functions that remain unchanged
 function scrollSection(id) {
   showScreen('landing');
   setTimeout(() => {
@@ -1489,9 +1480,6 @@ function scrollSection(id) {
   }, 120);
 }
 
-// ——————————————————————————————————
-// MOBILE MENU
-// ——————————————————————————————————
 function toggleMobileMenu() {
   const menu = document.getElementById('mobile-menu');
   const isOpen = menu.style.display === 'flex';
@@ -1499,24 +1487,15 @@ function toggleMobileMenu() {
   document.body.style.overflow = isOpen ? '' : 'hidden';
 }
 
-// ——————————————————————————————————
-// BOOKING
-// ——————————————————————————————————
-function bookStep(n) {
-  document.querySelectorAll('.booking-block').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('block-' + n).classList.add('active');
-  document.getElementById('tab-' + n).classList.add('active');
-  if (n === 4) {
-    document.getElementById('sum-service').textContent = state.selectedService;
-    document.getElementById('sum-barber').textContent  = state.selectedBarber;
-  }
+function setLoginTab(el, role) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // role é capturado por app.js
 }
 
 function selectOpt(el, type, value) {
   el.parentElement.querySelectorAll('.booking-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
-  state[type === 'service' ? 'selectedService' : 'selectedBarber'] = value;
 }
 
 function selectDay(el) {
@@ -1529,66 +1508,14 @@ function selectTime(el) {
   el.classList.add('selected');
 }
 
-function confirmBooking() {
-  showToast('✓ Agendamento confirmado! Você receberá uma confirmação por SMS.');
-  setTimeout(() => showScreen('landing'), 2500);
+function bookStep(n) {
+  document.querySelectorAll('.booking-block').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('block-' + n).classList.add('active');
+  document.getElementById('tab-' + n).classList.add('active');
 }
 
-// ——————————————————————————————————
-// LOGIN
-// ——————————————————————————————————
-function setLoginTab(el, role) {
-  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  state.loginRole = role;
-}
-
-function doLogin() {
-  if (state.loginRole === 'admin') {
-    showScreen('admin-dash');
-  } else {
-    showScreen('barber-dash');
-  }
-  showToast('Bem-vindo de volta, Jodi!');
-}
-
-// ——————————————————————————————————
-// ADMIN PLACEHOLDERS
-// ——————————————————————————————————
-const placeholderData = {
-  financeiro:    { icon: '◉', title: 'Financeiro',    msg: 'Fluxo de caixa, comissões e DRE integrados.' },
-  clientes:      { icon: '◇', title: 'Clientes',      msg: 'CRM completo com histórico e fidelidade.' },
-  relatorios:    { icon: '◆', title: 'Relatórios',    msg: 'Análises avançadas e exportação de dados.' },
-  servicos:      { icon: '⬡', title: 'Serviços',      msg: 'Catálogo, preços e pacotes configuráveis.' },
-  equipe:        { icon: '✦', title: 'Equipe',        msg: 'Gestão de barbeiros, horários e comissões.' },
-  configuracoes: { icon: '◇', title: 'Configurações', msg: 'Notificações, integrações e personalização.' }
-};
-
-function showPlaceholder(name) {
-  const d = placeholderData[name];
-  document.getElementById('admin-main').innerHTML = `
-    <div class="dash-header"><div><h1 class="dash-greeting">${d.title}</h1><p class="dash-date">Em breve disponível</p></div></div>
-    <div class="placeholder-screen">
-      <div class="placeholder-icon">${d.icon}</div>
-      <div class="placeholder-title">${d.title}</div>
-      <p class="placeholder-msg">${d.msg}<br><br>Módulo em desenvolvimento. Pronto para integração backend.</p>
-      <button class="btn-secondary" style="margin-top:2rem;" onclick="location.reload()">← Voltar ao painel</button>
-    </div>`;
-}
-
-// ——————————————————————————————————
-// TOAST
-// ——————————————————————————————————
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
-}
-
-// ——————————————————————————————————
-// CAROUSEL
-// ——————————————————————————————————
+// Carousel Init
 (function initCarousel() {
   const track      = document.getElementById('carousel-track');
   const indicators = document.getElementById('carousel-indicators');
@@ -1599,17 +1526,14 @@ function showToast(msg) {
   let current      = 0;
   let autoTimer    = null;
 
-  // Calcula quantos slides aparecem de uma vez
   function visibleCount() {
     return window.innerWidth <= 768 ? 1 : 3;
   }
 
-  // Máximo de posições distintas
   function maxIndex() {
     return Math.max(0, total - visibleCount());
   }
 
-  // Constrói indicadores
   function buildIndicators() {
     indicators.innerHTML = '';
     const count = maxIndex() + 1;
@@ -1624,14 +1548,12 @@ function showToast(msg) {
 
   function goTo(index) {
     current = Math.max(0, Math.min(index, maxIndex()));
-    // Calcula largura de cada slide + gap
     const slideEl    = slides[0];
     const slideW     = slideEl.offsetWidth;
-    const gap        = 19.2; // 1.2rem em px (aproximado)
+    const gap        = 19.2;
     const offsetPx   = current * (slideW + gap);
     track.style.transform = `translateX(-${offsetPx}px)`;
 
-    // Atualiza indicadores
     indicators.querySelectorAll('.indicator').forEach((ind, i) => {
       ind.classList.toggle('active', i === current);
     });
@@ -1655,7 +1577,6 @@ function showToast(msg) {
     startAuto();
   }
 
-  // Touch/swipe support
   let touchStartX = 0;
   track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
   track.addEventListener('touchend', e => {
@@ -1663,11 +1584,9 @@ function showToast(msg) {
     if (Math.abs(diff) > 50) carouselMove(diff > 0 ? 1 : -1);
   }, { passive: true });
 
-  // Pausa no hover (desktop)
   track.addEventListener('mouseenter', () => clearInterval(autoTimer));
   track.addEventListener('mouseleave', startAuto);
 
-  // Rebuild on resize
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
