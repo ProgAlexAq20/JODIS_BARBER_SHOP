@@ -1122,31 +1122,9 @@ nav {
     <div class="section">
       <p class="section-label">Nossa equipe</p>
       <h2 class="section-title">Os Artistas</h2>
-      <div class="barbers-grid">
-        <div class="barber-card" onclick="showScreen('booking')">
-          <div class="barber-avatar">JD</div>
-          <div class="barber-name">Jodi</div>
-          <div class="barber-role">Master Barber · Fundador</div>
-          <div class="barber-rating"><span>★★★★★</span> 4.9 (847)</div>
-        </div>
-        <div class="barber-card" onclick="showScreen('booking')">
-          <div class="barber-avatar">MR</div>
-          <div class="barber-name">Marcus</div>
-          <div class="barber-role">Senior Barber</div>
-          <div class="barber-rating"><span>★★★★★</span> 4.8 (521)</div>
-        </div>
-        <div class="barber-card" onclick="showScreen('booking')">
-          <div class="barber-avatar">LF</div>
-          <div class="barber-name">Lucas</div>
-          <div class="barber-role">Barber Specialist</div>
-          <div class="barber-rating"><span>★★★★★</span> 4.9 (389)</div>
-        </div>
-        <div class="barber-card" onclick="showScreen('booking')">
-          <div class="barber-avatar">AT</div>
-          <div class="barber-name">André</div>
-          <div class="barber-role">Color &amp; Style</div>
-          <div class="barber-rating"><span>★★★★☆</span> 4.7 (214)</div>
-        </div>
+      <div class="barbers-grid" id="landing-barbers-grid">
+        <!-- Barbeiros carregados via Firestore pelo app.js -->
+        <p style="color: var(--muted);">Carregando barbeiros...</p>
       </div>
     </div>
   </section>
@@ -1315,20 +1293,17 @@ nav {
         <button class="btn-primary" style="font-size:0.72rem;padding:0.65rem 1.4rem;">+ Novo Agendamento</button>
       </div>
       <div class="kpi-row">
-        <div class="kpi"><div class="kpi-label">Hoje</div><div class="kpi-value">8</div><div class="kpi-change">↑ 2 vs ontem</div></div>
-        <div class="kpi"><div class="kpi-label">Faturamento</div><div class="kpi-value">R$ 720</div><div class="kpi-change">↑ 12%</div></div>
-        <div class="kpi"><div class="kpi-label">Este Mês</div><div class="kpi-value">R$ 8.4k</div><div class="kpi-change">↑ 8%</div></div>
-        <div class="kpi"><div class="kpi-label">Avaliação</div><div class="kpi-value">4.9 ★</div><div class="kpi-change">127 reviews</div></div>
+        <div class="kpi"><div class="kpi-label">Hoje</div><div class="kpi-value" id="barber-kpi-today-count">0</div><div class="kpi-change">Carregando...</div></div>
+        <div class="kpi"><div class="kpi-label">Faturamento</div><div class="kpi-value" id="barber-kpi-day-revenue">R$ 0,00</div><div class="kpi-change">Carregando...</div></div>
+        <div class="kpi"><div class="kpi-label">Concluídos</div><div class="kpi-value" id="barber-kpi-done-count">0</div><div class="kpi-change">Hoje</div></div>
+        <div class="kpi"><div class="kpi-label">Cancelados</div><div class="kpi-value" id="barber-kpi-canceled-count">0</div><div class="kpi-change">Hoje</div></div>
       </div>
       <div class="dash-grid">
         <div class="dash-card">
           <div class="dash-card-title">Agenda de Hoje <a href="#">Ver tudo →</a></div>
-          <div class="appointment-list">
-            <div class="appt"><div class="appt-time"><div class="appt-hour">09:30</div><div class="appt-period">AM</div></div><div><div class="appt-client">Carlos Mendes</div><div class="appt-service">Corte + Barba · 70min</div></div><div class="appt-status status-done">Concluído</div></div>
-            <div class="appt"><div class="appt-time"><div class="appt-hour">11:00</div><div class="appt-period">AM</div></div><div><div class="appt-client">Rafael Souza</div><div class="appt-service">Corte Clássico · 45min</div></div><div class="appt-status status-confirmed">Confirmado</div></div>
-            <div class="appt"><div class="appt-time"><div class="appt-hour">12:00</div><div class="appt-period">PM</div></div><div><div class="appt-client">Bruno Lima</div><div class="appt-service">Experiência VIP · 120min</div></div><div class="appt-status status-confirmed">Confirmado</div></div>
-            <div class="appt"><div class="appt-time"><div class="appt-hour">02:30</div><div class="appt-period">PM</div></div><div><div class="appt-client">Felipe Costa</div><div class="appt-service">Barba Completa · 30min</div></div><div class="appt-status status-waiting">Aguardando</div></div>
-            <div class="appt"><div class="appt-time"><div class="appt-hour">03:30</div><div class="appt-period">PM</div></div><div><div class="appt-client">André Martins</div><div class="appt-service">Corte Clássico · 45min</div></div><div class="appt-status status-waiting">Aguardando</div></div>
+          <div class="appointment-list" id="barber-appointment-list">
+            <!-- Agendamentos carregados via Firestore pelo app.js -->
+            <p style="color: var(--muted); text-align: center; padding: 2rem;">Carregando agendamentos...</p>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:1.5rem;">
