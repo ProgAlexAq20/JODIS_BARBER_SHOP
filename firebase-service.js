@@ -207,6 +207,8 @@ export async function createAppointment(appointmentData) {
  
 /**
  * Busca agendamentos do barbeiro para o dia (requer login)
+ * Sem orderBy para evitar necessidade de índice composto no Firestore.
+ * Ordenação por time feita no JavaScript após o snapshot.
  */
 export function onBarberAppointmentsToday(barberId, dateStr, callback) {
   const q = query(
@@ -216,10 +218,9 @@ export function onBarberAppointmentsToday(barberId, dateStr, callback) {
   );
 
   return onSnapshot(q, (snap) => {
-    const appts = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => String(a.time).localeCompare(String(b.time)));
-
+    let appts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Ordena por time no JavaScript para evitar índice composto
+    appts.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
     callback(appts);
   }, (e) => {
     console.error('Erro ao ouvir agendamentos:', e);
@@ -235,19 +236,22 @@ export function onAllAppointments(callback, dateFilter = null) {
   if (dateFilter) {
     q = query(
       collection(window.db, 'appointments'),
-      where('date', '==', dateFilter),
-      orderBy('time', 'asc')
+      where('date', '==', dateFilter)
     );
   } else {
     q = query(
-      collection(window.db, 'appointments'),
-      orderBy('date', 'desc'),
-      orderBy('time', 'desc')
+      collection(window.db, 'appointments')
     );
   }
  
   return onSnapshot(q, (snap) => {
-    const appts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    let appts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Ordena por date e time no JavaScript para evitar índices
+    appts.sort((a, b) => {
+      const dateCompare = (b.date || '').localeCompare(a.date || '');
+      if (dateCompare !== 0) return dateCompare;
+      return (b.time || '').localeCompare(a.time || '');
+    });
     callback(appts);
   }, (e) => {
     console.error('Erro ao ouvir agendamentos admin:', e);
@@ -403,4 +407,3 @@ export async function getMonthKPIs(yearMonth) {
     return { revenue: 0, count: 0, avgTicket: 0, topServices: [], barberRevenue: {}, monthAppts: [] };
   }
 }
- 
