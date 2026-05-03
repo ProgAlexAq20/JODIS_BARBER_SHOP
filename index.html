@@ -1177,27 +1177,14 @@ nav {
     <!-- STEP 1 -->
     <div class="booking-block active" id="block-1">
       <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1.5rem;">Escolha o Serviço</h3>
-      <div class="booking-grid">
-        <div class="booking-option selected" onclick="selectOpt(this,'service','Corte Clássico')"><div class="opt-name">Corte Clássico</div><div class="opt-meta">45 min · R$ 75</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'service','Barba Completa')"><div class="opt-name">Barba Completa</div><div class="opt-meta">30 min · R$ 55</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'service','Corte + Barba')"><div class="opt-name">Corte + Barba</div><div class="opt-meta">70 min · R$ 120</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'service','Tratamento Capilar')"><div class="opt-name">Tratamento Capilar</div><div class="opt-meta">60 min · R$ 90</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'service','Sobrancelha')"><div class="opt-name">Sobrancelha</div><div class="opt-meta">15 min · R$ 30</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'service','Experiência VIP')"><div class="opt-name">Experiência VIP</div><div class="opt-meta">120 min · R$ 200</div></div>
-      </div>
+      <div class="booking-grid"></div>
       <button class="btn-primary" style="width:100%;" onclick="bookStep(2)">Próximo →</button>
     </div>
 
     <!-- STEP 2 -->
     <div class="booking-block" id="block-2">
       <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1.5rem;">Escolha o Barbeiro</h3>
-      <div class="booking-grid">
-        <div class="booking-option selected" onclick="selectOpt(this,'barber','Jodi')"><div class="opt-name">Jodi</div><div class="opt-meta">Master · ★4.9</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'barber','Marcus')"><div class="opt-name">Marcus</div><div class="opt-meta">Senior · ★4.8</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'barber','Lucas')"><div class="opt-name">Lucas</div><div class="opt-meta">Specialist · ★4.9</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'barber','André')"><div class="opt-name">André</div><div class="opt-meta">Color · ★4.7</div></div>
-        <div class="booking-option" onclick="selectOpt(this,'barber','Qualquer')"><div class="opt-name">Qualquer</div><div class="opt-meta">Primeiro disponível</div></div>
-      </div>
+      <div class="booking-grid"></div>
       <div style="display:flex;gap:1rem;">
         <button class="btn-secondary" onclick="bookStep(1)">← Voltar</button>
         <button class="btn-primary" style="flex:1;" onclick="bookStep(3)">Próximo →</button>
@@ -1259,12 +1246,12 @@ nav {
     <div class="booking-block" id="block-4">
       <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1.5rem;">Confirmar Agendamento</h3>
       <div class="booking-summary">
-        <div class="summary-row"><span class="summary-label">Serviço</span><span class="summary-value" id="sum-service">Corte Clássico</span></div>
-        <div class="summary-row"><span class="summary-label">Barbeiro</span><span class="summary-value" id="sum-barber">Jodi</span></div>
-        <div class="summary-row"><span class="summary-label">Data</span><span class="summary-value">14 de Maio, 2025</span></div>
-        <div class="summary-row"><span class="summary-label">Horário</span><span class="summary-value">11:00</span></div>
-        <div class="summary-row"><span class="summary-label">Duração</span><span class="summary-value">45 min</span></div>
-        <div class="summary-row summary-total"><span class="summary-label">Total</span><span class="summary-value">R$ 75</span></div>
+        <div class="summary-row"><span class="summary-label">Serviço</span><span class="summary-value" id="sum-service">—</span></div>
+        <div class="summary-row"><span class="summary-label">Barbeiro</span><span class="summary-value" id="sum-barber">—</span></div>
+        <div class="summary-row"><span class="summary-label">Data</span><span class="summary-value" id="sum-date">—</span></div>
+        <div class="summary-row"><span class="summary-label">Horário</span><span class="summary-value" id="sum-time">—</span></div>
+        <div class="summary-row"><span class="summary-label">Duração</span><span class="summary-value" id="sum-duration">—</span></div>
+        <div class="summary-row summary-total"><span class="summary-label">Total</span><span class="summary-value" id="sum-total">—</span></div>
       </div>
       <div class="form-row" style="margin-bottom:1rem;">
         <div class="form-field"><label class="form-label">Nome Completo</label><input id="client-name" class="form-input" type="text" placeholder="Seu nome" /></div>
