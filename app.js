@@ -137,14 +137,23 @@ export async function initBookingScreen() {
     
     // Renderiza barbeiros
     renderBarberCards();
+    
+    // Sincroniza summary
+    updateSummary();
   } catch (e) {
     console.error('Erro ao iniciar agendamento:', e);
+    showToast('✗ Erro ao carregar dados. Tente novamente.');
   }
 }
 
 function renderServiceCards() {
   const grid = document.querySelector('#block-1 .booking-grid');
   if (!grid) return;
+
+  if (appState.services.length === 0) {
+    grid.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Nenhum serviço disponível. Verifique Firestore.</p>';
+    return;
+  }
 
   grid.innerHTML = appState.services.map((service, idx) => `
     <div class="booking-option ${idx === 0 ? 'selected' : ''}" onclick="selectServiceReal('${service.id}', this)">
@@ -155,12 +164,18 @@ function renderServiceCards() {
 
   if (appState.services.length > 0) {
     appState.selectedService = appState.services[0];
+    updateSummary();
   }
 }
 
 function renderBarberCards() {
   const grid = document.querySelector('#block-2 .booking-grid');
   if (!grid) return;
+
+  if (appState.barbers.length === 0) {
+    grid.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Nenhum barbeiro disponível. Verifique Firestore.</p>';
+    return;
+  }
 
   grid.innerHTML = appState.barbers.map((barber, idx) => `
     <div class="booking-option ${idx === 0 ? 'selected' : ''}" onclick="selectBarberReal('${barber.id}', this)">
@@ -171,6 +186,7 @@ function renderBarberCards() {
 
   if (appState.barbers.length > 0) {
     appState.selectedBarber = appState.barbers[0];
+    updateSummary();
   }
 }
 
@@ -181,6 +197,7 @@ window.selectServiceReal = function(serviceId, el) {
   el.parentElement.querySelectorAll('.booking-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   appState.selectedService = service;
+  updateSummary();
 };
 
 window.selectBarberReal = function(barberId, el) {
@@ -189,6 +206,11 @@ window.selectBarberReal = function(barberId, el) {
   el.parentElement.querySelectorAll('.booking-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   appState.selectedBarber = barber;
+  updateSummary();
+  // Se houver data, recarrega horários para novo barbeiro
+  if (appState.selectedDate) {
+    loadTimeSlotsForSelectedDate();
+  }
 };
 
 // Sobrescreve selectDay para carregar horários e capturar data
@@ -200,6 +222,7 @@ window.selectDay = async function(el) {
   if (!dayText || el.classList.contains('disabled')) return;
 
   appState.selectedDate = formatDateForFirestore(dayText);
+  updateSummary();
   await loadTimeSlotsForSelectedDate();
 };
 
@@ -209,6 +232,7 @@ window.selectTime = function(el) {
   if (el.classList.contains('unavailable')) return;
   originalSelectTime(el);
   appState.selectedTime = el.textContent.trim();
+  updateSummary();
 };
 
 // Sobrescreve confirmBooking para salvar no Firebase
@@ -324,6 +348,36 @@ function formatDateForFirestore(dayText) {
   const day = String(dayText).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
+}
+
+function updateSummary() {
+  const sumService = document.getElementById('sum-service');
+  const sumBarber = document.getElementById('sum-barber');
+  const sumDate = document.getElementById('sum-date');
+  const sumTime = document.getElementById('sum-time');
+  const sumDuration = document.getElementById('sum-duration');
+  const sumTotal = document.getElementById('sum-total');
+
+  if (appState.selectedService) {
+    if (sumService) sumService.textContent = appState.selectedService.name;
+    if (sumDuration) sumDuration.textContent = `${appState.selectedService.durationMinutes} min`;
+    if (sumTotal) sumTotal.textContent = `R$ ${appState.selectedService.price.toFixed(2)}`;
+  }
+
+  if (appState.selectedBarber && sumBarber) {
+    sumBarber.textContent = appState.selectedBarber.name;
+  }
+
+  if (appState.selectedDate && sumDate) {
+    // Converte de YYYY-MM-DD para formato legível
+    const [year, month, day] = appState.selectedDate.split('-');
+    const months = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    sumDate.textContent = `${day} de ${months[parseInt(month)]}, ${year}`;
+  }
+
+  if (appState.selectedTime && sumTime) {
+    sumTime.textContent = appState.selectedTime;
+  }
 }
 
 // Sobrescreve bookStep para iniciar agendamento
@@ -582,4 +636,3 @@ window.showToast = showToast;
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
 });
-
