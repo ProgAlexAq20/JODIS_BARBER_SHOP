@@ -123,11 +123,8 @@ window.doLogin = async function() {
 
 // Tornar funções globais para eventos onclick
 window.showScreen = showScreen;
-window.bookStep = bookStep;
-window.toggleMobileMenu = toggleMobileMenu;
-window.selectServiceReal = selectServiceReal;
-window.selectBarberReal = selectBarberReal;
-window.confirmBooking = confirmBooking;
+window.showToast = showToast;
+window.handleLogout = handleLogout;
 
 // ════════════════════════════════════
 // BOOKING - CARREGA DADOS REAIS
