@@ -335,9 +335,26 @@ function renderTimeSlots(slots) {
 }
 
 function formatDateForFirestore(dayText) {
-  // Busca o mês da UI (ex: "Maio 2025")
+  // Busca o mês/ano visível no calendário UI
   const monthEl = document.querySelector('.cal-month');
-  const [monthStr, yearStr] = monthEl.textContent.split(' ');
+  if (!monthEl) {
+    // Fallback: usa data de hoje
+    return formatToday();
+  }
+  
+  const text = monthEl.textContent.trim();
+  const parts = text.split(' ');
+  let monthStr, yearStr;
+  
+  if (parts.length >= 2) {
+    monthStr = parts[0];
+    yearStr = parts[1];
+  } else {
+    // Fallback para data atual
+    const now = new Date();
+    yearStr = String(now.getFullYear());
+    monthStr = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][now.getMonth() + 1];
+  }
   
   const months = {
     'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04',
@@ -345,7 +362,7 @@ function formatDateForFirestore(dayText) {
     'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'
   };
   
-  const month = months[monthStr];
+  const month = months[monthStr] || '01';
   const year = yearStr;
   const day = String(dayText).padStart(2, '0');
 
@@ -691,11 +708,142 @@ window.showScreen = showScreen;
 window.showToast = showToast;
 
 // ════════════════════════════════════
+// CALENDAR - GENERADOR DINÂMICO
+// ════════════════════════════════════
+
+/**
+ * Estado do calendário para navegação entre meses
+ */
+let calendarState = {
+  currentYear: null,
+  currentMonth: null // 0-11
+};
+
+/**
+ * Inicializa o calendário com o mês/ano atual
+ */
+function initCalendar() {
+  const now = new Date();
+  calendarState.currentYear = now.getFullYear();
+  calendarState.currentMonth = now.getMonth();
+  renderCalendar();
+}
+
+/**
+ * Renderiza o calendário para o mês/ano atual no calendarState
+ */
+function renderCalendar() {
+  const monthEl = document.getElementById('calendar-month-year');
+  const daysContainer = document.querySelector('.cal-days');
+  
+  if (!monthEl || !daysContainer) return;
+  
+  const { currentYear, currentMonth } = calendarState;
+  
+  // Nomes dos meses em português
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  
+  // Atualiza header do calendário
+  monthEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+  
+  // Calcula o primeiro dia do mês e quantos dias tem
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  const lastDay = new Date(currentYear, currentMonth + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startingDay = firstDay.getDay(); // 0 = Domingo, 6 = Sábado
+  
+  // Data de hoje para marcar
+  const today = new Date();
+  const todayDay = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
+  const isCurrentMonth = currentMonth === todayMonth && currentYear === todayYear;
+  
+  // Dias da semana (labels)
+  const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  
+  // Constrói o HTML do calendário
+  let html = '';
+  
+  // Adiciona labels dos dias
+  dayLabels.forEach(label => {
+    html += `<div class="cal-day-label">${label}</div>`;
+  });
+  
+  // Dias do mês anterior (preenchimento)
+  const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+  for (let i = startingDay - 1; i >= 0; i--) {
+    html += `<div class="cal-day disabled">${prevMonthLastDay - i}</div>`;
+  }
+  
+  // Dias do mês atual
+  const todayObj = new Date();
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateObj = new Date(currentYear, currentMonth, day);
+    const dayOfWeek = dateObj.getDay();
+    const isToday = isCurrentMonth && day === todayDay;
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isPast = dateObj < new Date(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
+    
+    let classes = 'cal-day';
+    if (isToday) classes += ' today';
+    if (isWeekend || isPast) classes += ' disabled';
+    
+    html += `<div class="${classes}" onclick="selectDay(this)">${day}</div>`;
+  }
+  
+  // Dias do próximo mês (preenchimento para completar grade)
+  const totalCells = startingDay + daysInMonth;
+  const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remainingCells; i++) {
+    html += `<div class="cal-day disabled">${i}</div>`;
+  }
+  
+  daysContainer.innerHTML = html;
+}
+
+/**
+ * Navega para o mês anterior
+ */
+function calendarPrevMonth() {
+  calendarState.currentMonth--;
+  if (calendarState.currentMonth < 0) {
+    calendarState.currentMonth = 11;
+    calendarState.currentYear--;
+  }
+  renderCalendar();
+}
+
+/**
+ * Navega para o próximo mês
+ */
+function calendarNextMonth() {
+  calendarState.currentMonth++;
+  if (calendarState.currentMonth > 11) {
+    calendarState.currentMonth = 0;
+    calendarState.currentYear++;
+  }
+  renderCalendar();
+}
+
+// ════════════════════════════════════
 // INIT
 // ════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
+  initCalendar();
+  
+  // Configura botões de navegação do calendário
+  const calNavButtons = document.querySelectorAll('.cal-nav');
+  if (calNavButtons.length >= 2) {
+    calNavButtons[0].addEventListener('click', calendarPrevMonth);
+    calNavButtons[1].addEventListener('click', calendarNextMonth);
+  }
+  
   // Renderiza barbeiros na landing page quando estiver na tela de landing
   if (document.getElementById('screen-landing')) {
     renderLandingBarbers();
