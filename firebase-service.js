@@ -212,12 +212,14 @@ export function onBarberAppointmentsToday(barberId, dateStr, callback) {
   const q = query(
     collection(window.db, 'appointments'),
     where('barberId', '==', barberId),
-    where('date', '==', dateStr),
-    orderBy('time', 'asc')
+    where('date', '==', dateStr)
   );
- 
+
   return onSnapshot(q, (snap) => {
-    const appts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const appts = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => String(a.time).localeCompare(String(b.time)));
+
     callback(appts);
   }, (e) => {
     console.error('Erro ao ouvir agendamentos:', e);
