@@ -293,6 +293,78 @@ export async function getDayKPIs(dateStr) {
   }
 }
  
+/**
+ * Busca KPIs do dia para um barbeiro específico
+ */
+export async function getBarberDayKPIs(barberId, dateStr) {
+  try {
+    const q = query(
+      collection(window.db, 'appointments'),
+      where('barberId', '==', barberId),
+      where('date', '==', dateStr)
+    );
+    const snap = await getDocs(q);
+    const appts = snap.docs.map(d => d.data());
+
+    const confirmed = appts.filter(a => a.status === 'confirmed').length;
+    const inProgress = appts.filter(a => a.status === 'in_progress').length;
+    const done = appts.filter(a => a.status === 'done').length;
+    const canceled = appts.filter(a => a.status === 'canceled').length;
+
+    const revenueExpected = appts
+      .filter(a => ['confirmed', 'in_progress', 'done'].includes(a.status))
+      .reduce((sum, a) => sum + (a.servicePrice || 0), 0);
+
+    const revenueDone = appts
+      .filter(a => a.status === 'done')
+      .reduce((sum, a) => sum + (a.servicePrice || 0), 0);
+
+    return {
+      total: appts.length,
+      confirmed,
+      inProgress,
+      done,
+      canceled,
+      revenueExpected,
+      revenueDone
+    };
+  } catch (e) {
+    console.error('Erro ao calcular KPI do barbeiro:', e);
+    return { total: 0, confirmed: 0, inProgress: 0, done: 0, canceled: 0, revenueExpected: 0, revenueDone: 0 };
+  }
+}
+
+/**
+ * Busca KPIs do mês para um barbeiro específico
+ */
+export async function getBarberMonthKPIs(barberId, yearMonth) {
+  try {
+    const allAppts = await getDocs(collection(window.db, 'appointments'));
+    const monthAppts = allAppts.docs
+      .map(d => d.data())
+      .filter(a => a.date && a.date.startsWith(yearMonth) && a.barberId === barberId);
+
+    const revenue = monthAppts.reduce((sum, a) => sum + (a.servicePrice || 0), 0);
+    const count = monthAppts.length;
+    const avgTicket = count > 0 ? revenue / count : 0;
+
+    const done = monthAppts.filter(a => a.status === 'done').length;
+    const canceled = monthAppts.filter(a => a.status === 'canceled').length;
+
+    return {
+      revenue,
+      count,
+      avgTicket,
+      done,
+      canceled,
+      monthAppts
+    };
+  } catch (e) {
+    console.error('Erro ao calcular KPI do mês do barbeiro:', e);
+    return { revenue: 0, count: 0, avgTicket: 0, done: 0, canceled: 0, monthAppts: [] };
+  }
+}
+
 export async function getMonthKPIs(yearMonth) {
   try {
     const allAppts = await getDocs(collection(window.db, 'appointments'));
