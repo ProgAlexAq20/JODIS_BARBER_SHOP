@@ -316,22 +316,17 @@ function renderTimeSlots(slots) {
   const container = document.querySelector('.time-slots');
   if (!container) return;
 
-  const allSlots = [];
-  if (appState.businessSettings) {
-    const [openH, openM] = appState.businessSettings.openHour.split(':').map(Number);
-    const [closeH] = appState.businessSettings.closeHour.split(':').map(Number);
-    const interval = appState.businessSettings.slotIntervalMinutes || 30;
-
-    for (let h = openH; h < closeH; h++) {
-      for (let m = 0; m < 60; m += interval) {
-        if (h === closeH && m > 0) break;
-        allSlots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-      }
-    }
+  if (!slots || slots.length === 0) {
+    container.innerHTML = `
+      <p style="color: var(--muted); grid-column: 1/-1;">
+        Nenhum horário disponível para esta data.
+      </p>
+    `;
+    return;
   }
 
-  container.innerHTML = allSlots.map(slot => `
-    <div class="time-slot ${slots.includes(slot) ? '' : 'unavailable'}" onclick="selectTime(this)">
+  container.innerHTML = slots.map(slot => `
+    <div class="time-slot" onclick="selectTime(this)">
       ${slot}
     </div>
   `).join('');
