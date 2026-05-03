@@ -151,7 +151,10 @@ export async function getAvailableSlots(barberId, dateStr) {
 
     return slots.filter(slot => !booked.includes(slot));
   } catch (e) {
-    console.warn('Não foi possível consultar horários ocupados. Exibindo todos os horários e validando na confirmação.', e);
+    console.warn(
+      'Sem permissão para ler appointments. Exibindo todos os horários e validando na confirmação.',
+      e
+    );
 
     return slots;
   }
