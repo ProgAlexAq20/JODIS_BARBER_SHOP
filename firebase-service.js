@@ -120,39 +120,40 @@ export async function getBusinessSettings() {
  * Ignora agendamentos com status "canceled"
  */
 export async function getAvailableSlots(barberId, dateStr) {
-  try {
-    const settings = await getBusinessSettings();
-    if (!settings) return [];
+  const settings = await getBusinessSettings();
+  if (!settings) return [];
 
-    // Parse settings
-    const [openH, openM] = settings.openHour.split(':').map(Number);
-    const [closeH, closeM] = settings.closeHour.split(':').map(Number);
-    const interval = settings.slotIntervalMinutes || 30;
+  const [openH] = settings.openHour.split(':').map(Number);
+  const [closeH] = settings.closeHour.split(':').map(Number);
+  const interval = settings.slotIntervalMinutes || 30;
 
-    // Gera todos os slots do dia
-    const slots = [];
-    for (let h = openH; h < closeH; h++) {
-      for (let m = 0; m < 60; m += interval) {
-        if (h === closeH && m > 0) break;
-        slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-      }
+  const slots = [];
+
+  for (let h = openH; h < closeH; h++) {
+    for (let m = 0; m < 60; m += interval) {
+      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
     }
+  }
 
-    // Busca agendamentos do dia (excluindo cancelados)
+  try {
     const q = query(
       collection(window.db, 'appointments'),
       where('barberId', '==', barberId),
       where('date', '==', dateStr)
     );
+
     const snap = await getDocs(q);
+
     const booked = snap.docs
-      .filter(d => d.data().status !== 'canceled')
-      .map(d => d.data().time);
+      .map(d => d.data())
+      .filter(a => a.status !== 'canceled')
+      .map(a => a.time);
 
     return slots.filter(slot => !booked.includes(slot));
   } catch (e) {
-    console.error('Erro ao gerar slots:', e);
-    return [];
+    console.warn('Não foi possível consultar horários ocupados. Exibindo todos os horários e validando na confirmação.', e);
+
+    return slots;
   }
 }
 
@@ -160,46 +161,41 @@ export async function getAvailableSlots(barberId, dateStr) {
  * Cria agendamento com transaction para evitar conflitos
  */
 export async function createAppointment(appointmentData) {
+  const appointmentId = appointmentData.appointmentKey;
+
   try {
-    const appointmentId = appointmentData.appointmentKey;
-    
-    return await runTransaction(window.db, async (transaction) => {
-      const docRef = doc(window.db, 'appointments', appointmentId);
-      const docSnap = await transaction.get(docRef);
+    const docRef = doc(window.db, 'appointments', appointmentId);
 
-      if (docSnap.exists()) {
-        throw new Error('Horário já ocupado. Escolha outro.');
-      }
+    await setDoc(docRef, appointmentData);
 
-      // Cria agendamento
-      transaction.set(docRef, appointmentData);
-
-      // Cria/atualiza cliente
+    try {
       const clientRef = doc(window.db, 'clients', appointmentData.clientPhone);
-      const clientSnap = await transaction.get(clientRef);
 
-      if (!clientSnap.exists()) {
-        transaction.set(clientRef, {
-          name: appointmentData.clientName,
-          phone: appointmentData.clientPhone,
-          email: appointmentData.clientEmail || '',
-          createdAt: new Date(),
-          appointmentCount: 1
-        });
-      } else {
-        transaction.update(clientRef, {
-          appointmentCount: (clientSnap.data().appointmentCount || 0) + 1,
-          lastAppointment: new Date()
-        });
-      }
+      await setDoc(clientRef, {
+        name: appointmentData.clientName,
+        phone: appointmentData.clientPhone,
+        email: appointmentData.clientEmail || '',
+        lastAppointmentAt: new Date(),
+        updatedAt: new Date()
+      }, { merge: true });
+    } catch (clientError) {
+      console.warn('Agendamento criado, mas cliente não foi salvo:', clientError);
+    }
 
-      return { success: true, appointmentId };
-    });
+    return { success: true, appointmentId };
   } catch (e) {
-    throw new Error(e.message);
+    console.error('Erro ao criar agendamento:', e);
+
+    if (
+      e.code === 'permission-denied' ||
+      String(e.message).toLowerCase().includes('permission')
+    ) {
+      throw new Error('Horário indisponível. Escolha outro horário.');
+    }
+
+    throw new Error(e.message || 'Erro ao criar agendamento.');
   }
 }
-
 /**
  * Busca agendamentos do barbeiro para o dia
  */
