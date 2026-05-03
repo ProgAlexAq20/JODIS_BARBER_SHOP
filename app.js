@@ -16,7 +16,9 @@ import {
   onAllAppointments,
   updateAppointmentStatus,
   getDayKPIs,
-  getMonthKPIs
+  getMonthKPIs,
+  getBarberDayKPIs,
+  getBarberMonthKPIs
 } from './firebase-service.js';
 
 // Firebase imports inline para uso em dashboards
@@ -396,28 +398,42 @@ window.bookStep = async function(n) {
 let unsubscribeBarberAppts = null;
 
 async function initBarberDashboard(user) {
+  // Valida se usuário é barbeiro e tem barberId
+  if (!user.barberId) {
+    showToast('✗ Usuário não possui barberId configurado');
+    showScreen('login');
+    return;
+  }
+
   const today = formatToday();
   
-  // Atualiza header
-  document.querySelector('.sidebar-avatar').textContent = 
-    (user.name.match(/\b\w/g) || []).join('').slice(0, 2).toUpperCase();
+  // Atualiza header com dados reais
+  const initials = user.avatarInitials || (user.name.match(/\b\w/g) || []).join('').slice(0, 2).toUpperCase();
+  document.querySelector('.sidebar-avatar').textContent = initials;
   document.querySelector('.sidebar-name').textContent = user.name;
   document.querySelector('.dash-greeting').textContent = `Bom dia, ${user.name.split(' ')[0]}.`;
   document.querySelector('.dash-date').textContent = `${formatTodayPtBr()} · Carregando...`;
 
   // Carrega KPIs do dia APENAS para este barbeiro
-  const todayAppointments = await getDocs(query(
-    collection(window.db, 'appointments'),
-    where('barberId', '==', user.barberId),
-    where('date', '==', today)
-  ));
-  
-  const appts = todayAppointments.docs.map(d => d.data());
-  const revenue = appts.reduce((sum, a) => sum + (a.servicePrice || 0), 0);
-  const count = appts.length;
-
-  document.querySelectorAll('.kpi')[0].querySelector('.kpi-value').textContent = count;
-  document.querySelectorAll('.kpi')[1].querySelector('.kpi-value').textContent = `R$ ${revenue.toFixed(2)}`;
+  try {
+    const kpi = await getBarberDayKPIs(user.barberId, today);
+    
+    // Atualiza KPIs com IDs específicos
+    const kpiTodayCount = document.getElementById('barber-kpi-today-count');
+    const kpiDayRevenue = document.getElementById('barber-kpi-day-revenue');
+    const kpiDoneCount = document.getElementById('barber-kpi-done-count');
+    const kpiCanceledCount = document.getElementById('barber-kpi-canceled-count');
+    
+    if (kpiTodayCount) kpiTodayCount.textContent = kpi.total;
+    if (kpiDayRevenue) kpiDayRevenue.textContent = `R$ ${kpi.revenueExpected.toFixed(2)}`;
+    if (kpiDoneCount) kpiDoneCount.textContent = kpi.done;
+    if (kpiCanceledCount) kpiCanceledCount.textContent = kpi.canceled;
+    
+    // Atualiza texto da data com total
+    document.querySelector('.dash-date').textContent = `${formatTodayPtBr()} · ${kpi.total} atendimento${kpi.total !== 1 ? 's' : ''} hoje`;
+  } catch (e) {
+    console.error('Erro ao carregar KPIs:', e);
+  }
 
   // Listener realtime para agendamentos
   if (unsubscribeBarberAppts) unsubscribeBarberAppts();
@@ -477,6 +493,51 @@ window.updateApptStatus = async function(appointmentId, newStatus) {
     showToast('✗ Erro: ' + e.message);
   }
 };
+
+window.cancelAppointment = async function(appointmentId) {
+  if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return;
+  
+  try {
+    await updateAppointmentStatus(appointmentId, 'canceled');
+    showToast('✓ Agendamento cancelado');
+  } catch (e) {
+    showToast('✗ Erro: ' + e.message);
+  }
+};
+
+// ════════════════════════════════════
+// LANDING PAGE - BARBERS
+// ════════════════════════════════════
+
+/**
+ * Renderiza barbeiros ativos na seção #barbers da landing page
+ * Chamado quando a landing page é carregada
+ */
+export async function renderLandingBarbers() {
+  const container = document.getElementById('landing-barbers-grid');
+  if (!container) return;
+
+  try {
+    const barbers = await getActiveBarbers();
+    
+    if (barbers.length === 0) {
+      container.innerHTML = '<p style="color: var(--muted);">Carregando barbeiros...</p>';
+      return;
+    }
+
+    container.innerHTML = barbers.map(barber => `
+      <div class="barber-card" onclick="showScreen('booking')">
+        <div class="barber-avatar">${barber.avatarInitials || (barber.name.match(/\b\w/g) || []).join('').slice(0, 2).toUpperCase()}</div>
+        <div class="barber-name">${barber.name}</div>
+        <div class="barber-role">${barber.roleTitle || 'Barbeiro'}</div>
+        <div class="barber-rating"><span>★</span> ${barber.rating || '4.9'} (${barber.reviewCount || '0'})</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error('Erro ao carregar barbeiros da landing:', e);
+    container.innerHTML = '<p style="color: var(--muted);">Erro ao carregar barbeiros.</p>';
+  }
+}
 
 // ════════════════════════════════════
 // ADMIN DASHBOARD
@@ -635,4 +696,8 @@ window.showToast = showToast;
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
+  // Renderiza barbeiros na landing page quando estiver na tela de landing
+  if (document.getElementById('screen-landing')) {
+    renderLandingBarbers();
+  }
 });
