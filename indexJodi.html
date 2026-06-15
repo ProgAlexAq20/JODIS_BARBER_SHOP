@@ -240,6 +240,25 @@ nav {
     margin: 0 auto 1.5rem;
     max-width: 42ch;
   }
+  .auth-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    background: rgba(11,11,11,0.92);
+    backdrop-filter: blur(14px);
+  }
+  .auth-loading-panel {
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(18,18,18,0.96);
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+  }
 
 /* ============================================================
    HERO — VIDEO
@@ -1243,6 +1262,9 @@ nav {
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+<div id="auth-loading" class="auth-loading" hidden>
+  <div class="auth-loading-panel">Verificando acesso...</div>
+</div>
 
 <!-- ============================================================
      LANDING
@@ -1700,13 +1722,13 @@ nav {
       <div class="dash-header">
         <div>
           <h1 class="dash-greeting">Bom dia, Jodi.</h1>
-          <p class="dash-date">Quarta-feira, 14 de Maio · 8 atendimentos hoje</p>
+          <p class="dash-date">Carregando agenda de hoje...</p>
         </div>
         <button class="btn-primary" style="font-size:0.72rem;padding:0.65rem 1.4rem;">+ Novo Agendamento</button>
       </div>
       <div class="kpi-row">
         <div class="kpi"><div class="kpi-label">Hoje</div><div class="kpi-value" id="barber-kpi-today-count">0</div><div class="kpi-change">Carregando...</div></div>
-        <div class="kpi"><div class="kpi-label">Faturamento</div><div class="kpi-value" id="barber-kpi-day-revenue">R$ 0,00</div><div class="kpi-change">Carregando...</div></div>
+        <div class="kpi" hidden><div class="kpi-label">Faturamento</div><div class="kpi-value" id="barber-kpi-day-revenue">—</div><div class="kpi-change">Restrito</div></div>
         <div class="kpi"><div class="kpi-label">Concluídos</div><div class="kpi-value" id="barber-kpi-done-count">0</div><div class="kpi-change">Hoje</div></div>
         <div class="kpi"><div class="kpi-label">Cancelados</div><div class="kpi-value" id="barber-kpi-canceled-count">0</div><div class="kpi-change">Hoje</div></div>
       </div>
@@ -1721,20 +1743,11 @@ nav {
         <div style="display:flex;flex-direction:column;gap:1.5rem;">
           <div class="dash-card">
             <div class="dash-card-title">Ações Rápidas</div>
-            <div class="quick-actions">
-              <button class="quick-action">✦ Bloquear horário</button>
-              <button class="quick-action">✦ Adicionar cliente</button>
-              <button class="quick-action">✦ Ver histórico</button>
-              <button class="quick-action">✦ Solicitar folga</button>
-            </div>
+            <p style="color:var(--muted);line-height:1.8;padding:1rem 0 0;">Em breve: bloqueio de horários, histórico e ações rápidas.</p>
           </div>
           <div class="dash-card">
             <div class="dash-card-title">Próximos Dias</div>
-            <div style="display:flex;flex-direction:column;gap:0.6rem;">
-              <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:0.5rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);">Qui 15</span><span>6 agendamentos</span></div>
-              <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:0.5rem 0;border-bottom:1px solid var(--border);"><span style="color:var(--muted);">Sex 16</span><span>9 agendamentos</span></div>
-              <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:0.5rem 0;"><span style="color:var(--muted);">Sáb 17</span><span style="color:var(--gold);">Completo</span></div>
-            </div>
+            <p style="color:var(--muted);line-height:1.8;padding:1rem 0 0;">Em breve: previsão de agenda dos próximos dias.</p>
           </div>
         </div>
       </div>
@@ -1768,7 +1781,7 @@ nav {
       <div class="dash-header">
         <div>
           <h1 class="dash-greeting">Visão Geral</h1>
-          <p class="dash-date">Maio 2025 · Atualizado agora</p>
+          <p class="dash-date">Carregando resumo do painel...</p>
         </div>
         <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
           <button class="btn-secondary" style="font-size:0.7rem;padding:0.55rem 1.1rem;" onclick="exportAdminData()">↓ Exportar</button>
@@ -1776,28 +1789,20 @@ nav {
         </div>
       </div>
       <div class="revenue-row">
-        <div class="revenue-card"><div class="revenue-label">Faturamento do Mês</div><div class="revenue-value">R$ 34.820</div><div class="revenue-sub">↑ 18% vs Abril</div></div>
-        <div class="revenue-card"><div class="revenue-label">Atendimentos</div><div class="revenue-value">412</div><div class="revenue-sub">↑ 24 vs Abril</div></div>
-        <div class="revenue-card"><div class="revenue-label">Ticket Médio</div><div class="revenue-value">R$ 84,50</div><div class="revenue-sub">↑ 6% vs Abril</div></div>
+        <div class="revenue-card"><div class="revenue-label">Faturamento do Mês</div><div class="revenue-value">—</div><div class="revenue-sub">Carregando dados reais</div></div>
+        <div class="revenue-card"><div class="revenue-label">Atendimentos</div><div class="revenue-value">—</div><div class="revenue-sub">Carregando dados reais</div></div>
+        <div class="revenue-card"><div class="revenue-label">Ticket Médio</div><div class="revenue-value">—</div><div class="revenue-sub">Carregando dados reais</div></div>
       </div>
       <div class="kpi-row" style="margin-bottom:2rem;">
-        <div class="kpi"><div class="kpi-label">Novos Clientes</div><div class="kpi-value">67</div><div class="kpi-change">↑ 15%</div></div>
-        <div class="kpi"><div class="kpi-label">Taxa de Retorno</div><div class="kpi-value">78%</div><div class="kpi-change">↑ 3pts</div></div>
-        <div class="kpi"><div class="kpi-label">No-show</div><div class="kpi-value">4.2%</div><div class="kpi-change neg">↑ 1pt</div></div>
-        <div class="kpi"><div class="kpi-label">Avaliação</div><div class="kpi-value">4.8 ★</div><div class="kpi-change">312 reviews</div></div>
+        <div class="kpi"><div class="kpi-label">Atendimentos</div><div class="kpi-value">—</div><div class="kpi-change">Carregando...</div></div>
+        <div class="kpi"><div class="kpi-label">Faturamento</div><div class="kpi-value">—</div><div class="kpi-change">Carregando...</div></div>
+        <div class="kpi"><div class="kpi-label">Ticket Médio</div><div class="kpi-value">—</div><div class="kpi-change">Carregando...</div></div>
+        <div class="kpi"><div class="kpi-label">Serviços</div><div class="kpi-value">—</div><div class="kpi-change">Carregando...</div></div>
       </div>
       <div class="dash-grid">
         <div class="dash-card">
           <div class="dash-card-title">Faturamento Semanal</div>
-          <div class="revenue-chart">
-            <div class="bar-wrap"><div class="bar" style="height:65%"></div><div class="bar-label">S2</div></div>
-            <div class="bar-wrap"><div class="bar" style="height:80%"></div><div class="bar-label">S3</div></div>
-            <div class="bar-wrap"><div class="bar" style="height:55%"></div><div class="bar-label">S4</div></div>
-            <div class="bar-wrap"><div class="bar" style="height:90%"></div><div class="bar-label">S5</div></div>
-            <div class="bar-wrap"><div class="bar" style="height:70%"></div><div class="bar-label">S6</div></div>
-            <div class="bar-wrap"><div class="bar" style="height:85%"></div><div class="bar-label">S7</div></div>
-            <div class="bar-wrap"><div class="bar" style="height:100%"></div><div class="bar-label">S8</div></div>
-          </div>
+          <p style="color:var(--muted);line-height:1.8;padding:1rem 0 0;">Em breve: gráfico real sincronizado com o Firestore.</p>
         </div>
         <div class="dash-card">
           <div class="dash-card-title">Serviços Mais Pedidos</div>

@@ -40,6 +40,7 @@ import {
 
 const appState = {
   currentUser: null,
+  authResolved: false,
   selectedService: null,
   selectedBarber: null,
   selectedDate: null,
@@ -69,6 +70,20 @@ function getBusinessSettingList(value) {
     return value.split(',').map(item => item.trim()).filter(Boolean);
   }
   return [];
+}
+
+const barberOverrideEmails = new Set(['joi@jodis.com', 'jodi@jodis.com']);
+
+function normalizeUserAccess(user) {
+  if (!user) return null;
+
+  const email = String(user.email || '').toLowerCase().trim();
+  const normalizedRole = barberOverrideEmails.has(email) ? 'barber' : user.role;
+
+  return {
+    ...user,
+    role: normalizedRole
+  };
 }
 
 function buildWhatsAppBookingMessage() {
@@ -104,31 +119,58 @@ function openWhatsAppBooking() {
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
 }
 
-function canAccessScreen(name) {
-  const role = appState.currentUser?.role || null;
+function canAccessScreen(screenId, user = appState.currentUser) {
+  const role = user?.role || null;
+  const publicScreens = new Set(['landing', 'booking', 'login', 'access-denied']);
 
-  if (name === 'admin-dash') {
-    return ['admin', 'finance'].includes(role);
+  if (publicScreens.has(screenId)) return true;
+  if (!role) return false;
+
+  if (screenId === 'barber-dash') {
+    return role === 'barber';
   }
 
-  if (name === 'barber-dash') {
-    return ['admin', 'barber'].includes(role);
+  if (screenId === 'admin-dash') {
+    return role === 'admin' || role === 'finance';
   }
 
-  if (name === 'login') {
-    return true;
-  }
-
-  return true;
+  return false;
 }
 
 function syncRestrictedUi() {
-  const allowed = Boolean(appState.currentUser);
+  const role = appState.currentUser?.role || null;
   const desktopBtn = document.getElementById('desktop-area-btn');
   const mobileLink = document.getElementById('mobile-area-link');
 
-  if (desktopBtn) desktopBtn.hidden = !allowed;
-  if (mobileLink) mobileLink.hidden = !allowed;
+  if (desktopBtn) desktopBtn.hidden = !role;
+  if (mobileLink) mobileLink.hidden = !role;
+
+  document.querySelectorAll('[data-auth="admin"]').forEach(el => {
+    el.hidden = !['admin', 'finance'].includes(role);
+  });
+  document.querySelectorAll('[data-auth="admin-only"]').forEach(el => {
+    el.hidden = role !== 'admin';
+  });
+  document.querySelectorAll('[data-auth="finance"]').forEach(el => {
+    el.hidden = !(role === 'admin' || role === 'finance');
+  });
+  document.querySelectorAll('[data-auth="barber"]').forEach(el => {
+    el.hidden = role !== 'barber';
+  });
+
+  const sidebarBlocks = Array.from(document.querySelectorAll('.sidebar-nav li'));
+  const hideLabels = role === 'barber'
+    ? ['Clientes', 'Ganhos', 'Config.', 'Financeiro', 'Serviços', 'Relatórios', 'Equipe']
+    : role === 'finance'
+      ? ['Serviços', 'Clientes', 'Relatórios', 'Equipe', 'Config.']
+      : ['Clientes', 'Relatórios', 'Equipe', 'Config.'];
+
+  sidebarBlocks.forEach(item => {
+    const text = item.textContent.replace(/\s+/g, ' ').trim();
+    if (hideLabels.some(label => text.includes(label))) {
+      item.hidden = true;
+    }
+  });
 }
 
 function showDataWarning(message) {
@@ -152,6 +194,11 @@ function showAccessDenied(reason = 'Você não tem permissão para acessar esta 
   showScreen('access-denied');
 }
 
+function setAuthLoading(isLoading) {
+  const overlay = document.getElementById('auth-loading');
+  if (overlay) overlay.hidden = !isLoading;
+}
+
 // ════════════════════════════════════
 // AUTH & REDIRECT
 // ════════════════════════════════════
@@ -160,39 +207,41 @@ let unsubscribeAuth = null;
 
 export function initAuth() {
   try {
+    setAuthLoading(true);
     unsubscribeAuth = onAuthChange(async (user) => {
-      appState.currentUser = user;
+      appState.currentUser = normalizeUserAccess(user);
+      appState.authResolved = true;
       syncRestrictedUi();
+      setAuthLoading(false);
       
-      if (!user) {
+      if (!appState.currentUser) {
         // Usuário deslogado
-        if (!['landing', 'booking'].includes(getCurrentScreen())) {
-          showScreen('login');
+        if (!['landing', 'booking', 'login', 'access-denied'].includes(getCurrentScreen())) {
+          showScreen('landing');
         }
         return;
       }
 
       // Usuário logado - redireciona conforme role
-      if (user.role === 'admin') {
+      if (appState.currentUser.role === 'admin') {
         showScreen('admin-dash');
         initAdminDashboard();
-      } else if (user.role === 'finance') {
+      } else if (appState.currentUser.role === 'finance') {
         showScreen('admin-dash');
-        initAdminDashboard();
-        setTimeout(() => showFinancePanel(), 0);
-      } else if (user.role === 'barber') {
+        initAdminDashboard({ mode: 'finance' });
+        showFinancePanel();
+      } else if (appState.currentUser.role === 'barber') {
         showScreen('barber-dash');
-        initBarberDashboard(user);
+        initBarberDashboard(appState.currentUser);
       } else {
         showAccessDenied('Sua conta não possui permissão para acessar o painel interno.');
       }
     });
   } catch (e) {
     console.error('Firebase auth indisponível:', e);
+    setAuthLoading(false);
     showToast('Firebase indisponível. Verifique a configuração do projeto.');
-    if (getCurrentScreen() !== 'landing') {
-      showScreen('landing');
-    }
+    showScreen('landing');
   }
 }
 
@@ -598,21 +647,47 @@ async function initBarberDashboard(user) {
   try {
     const kpi = await getBarberDayKPIs(user.barberId, today);
     
-    // Atualiza KPIs com IDs específicos
-    const kpiTodayCount = document.getElementById('barber-kpi-today-count');
-    const kpiDayRevenue = document.getElementById('barber-kpi-day-revenue');
-    const kpiDoneCount = document.getElementById('barber-kpi-done-count');
-    const kpiCanceledCount = document.getElementById('barber-kpi-canceled-count');
-    
-    if (kpiTodayCount) kpiTodayCount.textContent = kpi.total;
-    if (kpiDayRevenue) kpiDayRevenue.textContent = `R$ ${kpi.revenueExpected.toFixed(2)}`;
-    if (kpiDoneCount) kpiDoneCount.textContent = kpi.done;
-    if (kpiCanceledCount) kpiCanceledCount.textContent = kpi.canceled;
+  // Atualiza KPIs com IDs específicos
+  const kpiTodayCount = document.getElementById('barber-kpi-today-count');
+  const kpiDayRevenue = document.getElementById('barber-kpi-day-revenue');
+  const kpiDoneCount = document.getElementById('barber-kpi-done-count');
+  const kpiCanceledCount = document.getElementById('barber-kpi-canceled-count');
+  
+  if (kpiTodayCount) kpiTodayCount.textContent = kpi.total;
+  if (kpiDayRevenue) {
+    const revenueCard = kpiDayRevenue.closest('.kpi');
+    if (revenueCard) revenueCard.hidden = true;
+  }
+  if (kpiDoneCount) kpiDoneCount.textContent = kpi.done;
+  if (kpiCanceledCount) kpiCanceledCount.textContent = kpi.canceled;
     
     // Atualiza texto da data com total
     document.querySelector('.dash-date').textContent = `${formatTodayPtBr()} · ${kpi.total} atendimento${kpi.total !== 1 ? 's' : ''} hoje`;
   } catch (e) {
     console.error('Erro ao carregar KPIs:', e);
+  }
+
+  const barberDash = document.getElementById('screen-barber-dash');
+  if (barberDash) {
+    const quickActions = Array.from(barberDash.querySelectorAll('.dash-card')).find(card =>
+      card.querySelector('.dash-card-title')?.textContent.includes('Ações Rápidas')
+    );
+    if (quickActions) {
+      quickActions.innerHTML = `
+        <div class="dash-card-title">Ações Rápidas</div>
+        <p style="color:var(--muted);line-height:1.8;padding:1rem 0 0;">Em breve: bloqueio de horários, histórico e ajustes rápidos.</p>
+      `;
+    }
+
+    const upcoming = Array.from(barberDash.querySelectorAll('.dash-card')).find(card =>
+      card.querySelector('.dash-card-title')?.textContent.includes('Próximos Dias')
+    );
+    if (upcoming) {
+      upcoming.innerHTML = `
+        <div class="dash-card-title">Próximos Dias</div>
+        <p style="color:var(--muted);line-height:1.8;padding:1rem 0 0;">Em breve: visão de agenda futura.</p>
+      `;
+    }
   }
 
   // Listener realtime para agendamentos
@@ -798,10 +873,11 @@ async function initAdminDashboard() {
   document.querySelectorAll('.revenue-card')[2].querySelector('.revenue-value').textContent = `R$ ${monthKPIs.avgTicket.toFixed(2)}`;
 
   // KPIs gerais
-  document.querySelectorAll('.kpi')[0].querySelector('.kpi-value').textContent = '67'; // mockado
-  document.querySelectorAll('.kpi')[1].querySelector('.kpi-value').textContent = '78%'; // mockado
-  document.querySelectorAll('.kpi')[2].querySelector('.kpi-value').textContent = '4.2%'; // mockado
-  document.querySelectorAll('.kpi')[3].querySelector('.kpi-value').textContent = '4.8 ★'; // mockado
+  const kpiCards = document.querySelectorAll('.kpi');
+  if (kpiCards[0]) kpiCards[0].querySelector('.kpi-value').textContent = dayKPIs.count;
+  if (kpiCards[1]) kpiCards[1].querySelector('.kpi-value').textContent = `R$ ${dayKPIs.revenue.toFixed(2)}`;
+  if (kpiCards[2]) kpiCards[2].querySelector('.kpi-value').textContent = `R$ ${monthKPIs.avgTicket.toFixed(2)}`;
+  if (kpiCards[3]) kpiCards[3].querySelector('.kpi-value').textContent = monthKPIs.count;
 
   // Listener realtime para agendamentos do dia
   if (unsubscribeAdminAppts) unsubscribeAdminAppts();
@@ -810,6 +886,19 @@ async function initAdminDashboard() {
   }, today);
 
   // Renderiza performance da equipe
+  const adminDash = document.getElementById('screen-admin-dash');
+  if (adminDash) {
+    const weekly = Array.from(adminDash.querySelectorAll('.dash-card')).find(card =>
+      card.querySelector('.dash-card-title')?.textContent.includes('Faturamento Semanal')
+    );
+    if (weekly) {
+      weekly.innerHTML = `
+        <div class="dash-card-title">Faturamento Semanal</div>
+        <p style="color:var(--muted);line-height:1.8;padding:1rem 0 0;">Gráfico em revisão. Os números reais aparecem no resumo financeiro.</p>
+      `;
+    }
+  }
+
   if (monthKPIs.barberRevenue) {
     const teamList = document.querySelector('.team-list');
     if (teamList) {
@@ -820,6 +909,11 @@ async function initAdminDashboard() {
           <div class="team-appts"><div style="font-size:0.65rem;color:var(--muted);">Fatur.</div>R$ ${escapeHtml(revenue.toFixed(0))}</div>
         </div>
       `).join('');
+    }
+  } else {
+    const teamList = document.querySelector('.team-list');
+    if (teamList) {
+      teamList.innerHTML = '<p style="color: var(--muted); text-align:center; padding: 1.5rem;">Sem dados reais de equipe para exibir.</p>';
     }
   }
 }
@@ -866,9 +960,11 @@ async function showFinancePanel() {
     const yearMonth = today.slice(0, 7);
     const dayKPIs = await getDayKPIs(today);
     const monthKPIs = await getMonthKPIs(yearMonth);
+    const topServicesEntries = Array.isArray(monthKPIs.topServices) ? monthKPIs.topServices : [];
+    const barberRevenueEntries = Object.entries(monthKPIs.barberRevenue || {});
 
-    const topServices = monthKPIs.topServices.length
-      ? monthKPIs.topServices.map(([serviceName, count]) => `
+    const topServices = topServicesEntries.length
+      ? topServicesEntries.map(([serviceName, count]) => `
           <div class="team-row">
             <div>
               <div class="team-name">${escapeHtml(serviceName)}</div>
@@ -914,8 +1010,8 @@ async function showFinancePanel() {
       <div class="dash-card" style="margin-top:1.5rem;">
         <div class="dash-card-title">Resumo por barbeiro</div>
         <div class="team-list">
-          ${Object.entries(monthKPIs.barberRevenue).length
-            ? Object.entries(monthKPIs.barberRevenue).map(([barberName, revenue]) => `
+          ${barberRevenueEntries.length
+            ? barberRevenueEntries.map(([barberName, revenue]) => `
                 <div class="team-row">
                   <div class="team-avatar">${escapeHtml((barberName.match(/\b\w/g) || []).join('').slice(0, 2).toUpperCase())}</div>
                   <div>
@@ -1196,7 +1292,11 @@ function showToast(msg) {
 }
 
 function showScreen(name) {
-  if (!canAccessScreen(name)) {
+  if (!canAccessScreen(name, appState.currentUser)) {
+    if (!appState.authResolved) {
+      showToast('Aguarde a verificação de acesso.');
+      return;
+    }
     showAccessDenied('Acesso restrito. Faça login com uma conta autorizada.');
     return;
   }
@@ -1217,6 +1317,7 @@ function showScreen(name) {
   } else if (name === 'landing') {
     renderLandingServices();
     renderLandingBarbers();
+    syncRestrictedUi();
   }
 }
 
@@ -1358,6 +1459,7 @@ function calendarNextMonth() {
 // ════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
+  showScreen('landing');
   syncRestrictedUi();
   initAuth();
   initCalendar();

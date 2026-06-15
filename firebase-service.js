@@ -28,6 +28,19 @@ function ensureFirebaseReady() {
     throw new Error('Firebase não inicializado. Verifique a conexão e o arquivo firebase-config.js.');
   }
 }
+
+const barberOverrideEmails = new Set(['joi@jodis.com', 'jodi@jodis.com']);
+
+function normalizeUserProfile(authUser, userData) {
+  const email = String(authUser?.email || userData?.email || '').toLowerCase().trim();
+  const role = barberOverrideEmails.has(email) ? 'barber' : userData.role;
+
+  return {
+    uid: authUser.uid,
+    ...userData,
+    role
+  };
+}
  
 // ════════════════════════════════════
 // AUTH
@@ -43,7 +56,7 @@ export async function loginWithEmail(email, password) {
     if (!userDoc.exists()) throw new Error('Usuário não encontrado no banco');
     if (!userDoc.data().active) throw new Error('Usuário desativado');
  
-    return { uid: user.uid, ...userDoc.data() };
+    return normalizeUserProfile(user, userDoc.data());
   } catch (e) {
     throw new Error(e.message);
   }
@@ -63,7 +76,7 @@ export function onAuthChange(callback) {
     }
     try {
       const userDoc = await getDoc(doc(window.db, 'users', user.uid));
-      callback(userDoc.exists() ? { uid: user.uid, ...userDoc.data() } : null);
+      callback(userDoc.exists() ? normalizeUserProfile(user, userDoc.data()) : null);
     } catch (e) {
       console.error('Erro ao carregar perfil autenticado:', e);
       callback(null);
