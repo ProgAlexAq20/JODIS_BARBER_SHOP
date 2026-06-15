@@ -1,0 +1,111 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isBarberOrAdmin() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'barber'
+      );
+    }
+
+    function isCurrentBarber(barberId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'barber' &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.barberId == barberId;
+    }
+
+    function isValidDate(value) {
+      return value is string && value.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    function isValidTime(value) {
+      return value is string && value.matches('^\\d{2}:\\d{2}$');
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /services/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /barbers/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /appointments/{appointmentId} {
+      allow create: if !exists(/databases/$(database)/documents/appointments/$(appointmentId))
+        && request.resource.data.keys().hasOnly([
+          'appointmentKey',
+          'clientName',
+          'clientPhone',
+          'clientEmail',
+          'serviceId',
+          'serviceName',
+          'servicePrice',
+          'serviceDuration',
+          'barberId',
+          'barberName',
+          'date',
+          'time',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.appointmentKey == appointmentId
+        && request.resource.data.status == 'confirmed'
+        && isValidDate(request.resource.data.date)
+        && isValidTime(request.resource.data.time)
+        && request.resource.data.servicePrice is number
+        && request.resource.data.serviceDuration is number;
+
+      allow read: if isAdmin() || isCurrentBarber(resource.data.barberId);
+
+      allow update: if isAdmin()
+        || (
+          isCurrentBarber(resource.data.barberId)
+          && request.resource.data.barberId == resource.data.barberId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+          && request.resource.data.status in ['confirmed', 'in_progress', 'done', 'canceled']
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    match /clients/{clientId} {
+      allow create: if request.resource.data.keys().hasOnly([
+          'name',
+          'phone',
+          'email',
+          'lastAppointmentAt',
+          'updatedAt'
+        ])
+        && request.resource.data.phone == clientId;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    match /exports/{exportId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
