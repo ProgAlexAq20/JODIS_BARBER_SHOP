@@ -3,9 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jodi's Barbershop — Jd. Imperador</title>
+<title>Jodi's Barbershop | Barbearia Premium em Jardim Imperador</title>
+<meta name="description" content="Jodi's Barbershop é a barbearia premium no Jardim Imperador, São Paulo. Agende corte, barba e experiência VIP com atendimento refinado e rápido pelo celular.">
+<meta name="theme-color" content="#0B0B0B">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://progalexaq20.github.io/JODIS_BARBER_SHOP/">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" href="./assets/jodi-logo.png">
+<link rel="apple-touch-icon" href="./assets/jodi-logo.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jodi's Barbershop">
+<meta property="og:title" content="Jodi's Barbershop | Barbearia Premium em Jardim Imperador">
+<meta property="og:description" content="Agende corte, barba e experiência VIP em uma barbearia premium no Jardim Imperador.">
+<meta property="og:url" content="https://progalexaq20.github.io/JODIS_BARBER_SHOP/">
+<meta property="og:image" content="./assets/jodi-poster.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jodi's Barbershop | Barbearia Premium">
+<meta name="twitter:description" content="Agendamento premium no Jardim Imperador com corte, barba e experiência VIP.">
+<meta name="twitter:image" content="./assets/jodi-poster.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": ["LocalBusiness", "BarberShop"],
+      "name": "Jodi's Barbershop",
+      "url": "https://progalexaq20.github.io/JODIS_BARBER_SHOP/",
+      "image": "https://progalexaq20.github.io/JODIS_BARBER_SHOP/assets/jodi-poster.png",
+      "telephone": "+55 11 99999-9999",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Jardim Imperador",
+        "addressLocality": "São Paulo",
+        "addressRegion": "SP",
+        "addressCountry": "BR"
+      },
+      "areaServed": "Jardim Imperador, São Paulo",
+      "priceRange": "R$40-R$130",
+      "sameAs": [
+        "https://wa.me/5511999999999"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Como faço um agendamento?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Escolha o serviço, selecione o barbeiro, data e horário e finalize no botão de confirmação."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Posso confirmar pelo WhatsApp?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sim. Ao concluir o agendamento, você pode confirmar a reserva no WhatsApp com uma mensagem automática."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "Service",
+      "name": "Corte e Barba",
+      "provider": {
+        "@type": "BarberShop",
+        "name": "Jodi's Barbershop"
+      },
+      "areaServed": "São Paulo"
+    }
+  ]
+}
+</script>
 <style>
 /* ============================================================
    VARIABLES & RESET
@@ -880,7 +954,222 @@ nav {
   .kpi-row { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
   .kpi { padding: 1.1rem; }
   .kpi-value { font-size: 1.4rem; }
-  .appt { grid-template-columns: 50px 1fr auto; gap: 0.6rem; }
+.appt { grid-template-columns: 50px 1fr auto; gap: 0.6rem; }
+}
+
+/* ============================================================
+   PREMIUM ADDITIONS
+   ============================================================ */
+.section {
+  width: min(1180px, calc(100% - 2.4rem));
+  margin: 0 auto;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+}
+.section-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin-bottom: 0.9rem;
+}
+.section-copy {
+  max-width: 720px;
+  color: rgba(245,245,245,0.78);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+.premium-card {
+  background: linear-gradient(180deg, rgba(26,26,26,0.98), rgba(18,18,18,0.94));
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.premium-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--gold-line);
+  color: var(--gold);
+  background: rgba(212,175,55,0.06);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 0 rgba(212,175,55,0.45);
+  animation: pulseGlow 2.5s infinite;
+}
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.45); }
+  70% { box-shadow: 0 0 0 12px rgba(212,175,55,0); }
+  100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+.stat-card {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(26,26,26,0.96), rgba(18,18,18,0.96));
+  border: 1px solid var(--border);
+  transition: transform 0.22s ease, border-color 0.22s ease;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-line);
+}
+.stat-card .stat-num {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+.review-grid,
+.faq-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.review-card,
+.faq-card {
+  padding: 1.4rem;
+  border-radius: 16px;
+  background: rgba(18,18,18,0.96);
+  border: 1px solid var(--border);
+}
+.review-stars { color: var(--gold); letter-spacing: 0.1rem; margin-bottom: 0.8rem; }
+.review-name { font-weight: 600; margin-top: 1rem; }
+.review-text, .faq-answer, .map-copy { color: rgba(245,245,245,0.76); line-height: 1.8; }
+.faq-question {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: var(--white);
+  text-align: left;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+.faq-item + .faq-item { margin-top: 1rem; }
+.faq-answer { margin-top: 0.8rem; display: none; }
+.faq-item.open .faq-answer { display: block; }
+.map-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+.map-embed {
+  min-height: 360px;
+  border: 0;
+  width: 100%;
+  filter: grayscale(0.18) contrast(1.06) saturate(0.85);
+}
+.float-wa, .mobile-cta-bar {
+  position: fixed;
+  z-index: 260;
+}
+.float-wa {
+  right: 1.2rem;
+  bottom: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border-radius: 999px;
+  background: #1DB954;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 14px 40px rgba(29,185,84,0.28);
+}
+.mobile-cta-bar {
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 0.85rem;
+  display: none;
+  gap: 0.65rem;
+}
+.mobile-cta-bar button, .mobile-cta-bar a {
+  flex: 1;
+  justify-content: center;
+  padding: 0.9rem 1rem;
+  border-radius: 999px;
+  text-align: center;
+  text-decoration: none;
+}
+.glass-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.fade-up {
+  animation: fadeUp 0.8s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.05);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.gallery-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(7,7,7,0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+  padding: 1.2rem;
+}
+.gallery-modal.open { display: flex; }
+.gallery-modal img {
+  max-width: min(96vw, 1200px);
+  max-height: 88vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+}
+.gallery-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(18,18,18,0.7);
+  border: 1px solid var(--border);
+  color: var(--white);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
 }
 </style>
 </head>
@@ -987,13 +1276,14 @@ nav {
     <div class="section">
       <p class="section-label">O que oferecemos</p>
       <h2 class="section-title">Serviços Premium</h2>
-      <div class="services-grid">
-        <div class="service-card"><div class="service-icon">✂</div><div class="service-name">Corte Clássico</div><div class="service-desc">Corte personalizado com acabamento impecável. Cada detalhe executado com maestria.</div><div class="service-price">R$ 60</div></div>
-        <div class="service-card"><div class="service-icon">◈</div><div class="service-name">Barba Completa</div><div class="service-desc">Modelagem, hidratação e finalização com produtos premium selecionados.</div><div class="service-price">R$ 40</div></div>
-        <div class="service-card"><div class="service-icon">◉</div><div class="service-name">Corte + Barba</div><div class="service-desc">O combo exclusivo Jodi's. Transformação completa, do cabelo à barba.</div><div class="service-price">R$ 90</div></div>
-        <div class="service-card"><div class="service-icon">◇</div><div class="service-name">Tratamento Capilar</div><div class="service-desc">Hidratação profunda e cuidado intensivo para cabelos e couro cabeludo.</div><div class="service-price">R$ 50</div></div>
-        <div class="service-card"><div class="service-icon">⬡</div><div class="service-name">Sobrancelha</div><div class="service-desc">Design e alinhamento para um visual definido e expressivo.</div><div class="service-price">R$ 15</div></div>
-        <div class="service-card"><div class="service-icon">◆</div><div class="service-name">Experiência VIP</div><div class="service-desc">Corte + Barba + Tratamento + Barbeação a navalha. A experiência definitiva.</div><div class="service-price">R$ 130</div></div>
+      <div class="services-grid" id="landing-services-grid">
+        <div class="service-card premium-card">
+          <div class="premium-chip">Carregando</div>
+          <div class="service-icon">✦</div>
+          <div class="service-name">Serviços premium</div>
+          <div class="service-desc">Catálogo em sincronização com o Firestore.</div>
+          <div class="service-price">—</div>
+        </div>
       </div>
     </div>
   </section>
@@ -1021,7 +1311,7 @@ nav {
           Substituição: coloque o arquivo com o nome exato na pasta assets/
         -->
 
-        <div class="carousel-slide" onclick="showScreen('booking')">
+        <div class="carousel-slide" onclick="openGalleryModal(this.querySelector('img').getAttribute('src'), this.querySelector('.slide-caption-text').textContent)">
           <img
             src="./assets/ambiente-01.png"
             alt="Ambiente da Jodi's Barbershop"
@@ -1036,7 +1326,7 @@ nav {
           </div>
         </div>
 
-        <div class="carousel-slide" onclick="showScreen('booking')">
+        <div class="carousel-slide" onclick="openGalleryModal(this.querySelector('img').getAttribute('src'), this.querySelector('.slide-caption-text').textContent)">
           <img
             src="./assets/cliente-corte-01.png"
             alt="Corte premium"
@@ -1051,7 +1341,7 @@ nav {
           </div>
         </div>
 
-        <div class="carousel-slide" onclick="showScreen('booking')">
+        <div class="carousel-slide" onclick="openGalleryModal(this.querySelector('img').getAttribute('src'), this.querySelector('.slide-caption-text').textContent)">
           <img
             src="./assets/barbearia-01.png"
             alt="Barbearia"
@@ -1066,7 +1356,7 @@ nav {
           </div>
         </div>
 
-        <div class="carousel-slide" onclick="showScreen('booking')">
+        <div class="carousel-slide" onclick="openGalleryModal(this.querySelector('img').getAttribute('src'), this.querySelector('.slide-caption-text').textContent)">
           <img
             src="./assets/cliente-corte-02.png"
             alt="Barba completa"
@@ -1081,7 +1371,7 @@ nav {
           </div>
         </div>
 
-        <div class="carousel-slide" onclick="showScreen('booking')">
+        <div class="carousel-slide" onclick="openGalleryModal(this.querySelector('img').getAttribute('src'), this.querySelector('.slide-caption-text').textContent)">
           <img
             src="./assets/barbearia-02.png"
             alt="Produtos e ferramentas"
@@ -1096,7 +1386,7 @@ nav {
           </div>
         </div>
 
-        <div class="carousel-slide" onclick="showScreen('booking')">
+        <div class="carousel-slide" onclick="openGalleryModal(this.querySelector('img').getAttribute('src'), this.querySelector('.slide-caption-text').textContent)">
           <img
             src="./assets/cliente-corte-03.png"
             alt="Resultado final"
@@ -1125,6 +1415,78 @@ nav {
       <div class="barbers-grid" id="landing-barbers-grid">
         <!-- Barbeiros carregados via Firestore pelo app.js -->
         <p style="color: var(--muted);">Carregando barbeiros...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUMBERS -->
+  <section class="section">
+    <p class="section-label">Autoridade e confiança</p>
+    <h2 class="section-title">Nossos Números</h2>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">+2000</div><div class="stat-label">clientes atendidos</div></div>
+      <div class="stat-card"><div class="stat-num">4.9</div><div class="stat-label">avaliação média</div></div>
+      <div class="stat-card"><div class="stat-num">8 anos</div><div class="stat-label">de experiência</div></div>
+      <div class="stat-card"><div class="stat-num">+150</div><div class="stat-label">avaliações</div></div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section class="section" id="testimonials">
+    <p class="section-label">Prova social</p>
+    <h2 class="section-title">Avaliações dos Clientes</h2>
+    <div class="review-grid">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-name">Marcos A.</div>
+        <div class="review-text">Atendimento impecável, ambiente premium e horário respeitado.</div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-name">Diego R.</div>
+        <div class="review-text">A reserva foi rápida e o resultado do corte ficou excelente.</div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-name">Lucas P.</div>
+        <div class="review-text">Visual, limpeza e experiência muito acima da média.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ + MAP -->
+  <section class="section">
+    <p class="section-label">Dúvidas e localização</p>
+    <h2 class="section-title">Perguntas Frequentes</h2>
+    <div class="faq-grid">
+      <div class="faq-card">
+        <div class="faq-item open">
+          <button class="faq-question" type="button">Como faço meu agendamento?</button>
+          <div class="faq-answer">Escolha o serviço, selecione o barbeiro, data, horário e confirme. Ao final, você pode concluir no WhatsApp.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" type="button">Posso cancelar ou remarcar?</button>
+          <div class="faq-answer">Sim. A equipe pode ajustar o status pelo painel administrativo conforme a necessidade.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" type="button">A barbearia fica onde?</button>
+          <div class="faq-answer">Jardim Imperador, São Paulo, com atendimento pensado para região e facilidade de acesso.</div>
+        </div>
+      </div>
+      <div class="map-card map-grid">
+        <div>
+          <p class="section-label">Localização</p>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:0.7rem;">Jodi's Barbershop</h3>
+          <p style="color:var(--muted);line-height:1.8;margin-bottom:1.5rem;">Barbearia premium no Jardim Imperador, São Paulo. Ambiente reservado, atendimento preciso e fluxo rápido.</p>
+          <button class="btn-primary" onclick="showScreen('booking')">Agendar agora</button>
+        </div>
+        <div class="map-embed">
+          <iframe
+            title="Mapa da Jodi's Barbershop"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q=Jardim%20Imperador%20S%C3%A3o%20Paulo&output=embed"></iframe>
+        </div>
       </div>
     </div>
   </section>
@@ -1240,6 +1602,7 @@ nav {
         <button class="btn-secondary" onclick="bookStep(3)">← Voltar</button>
         <button class="btn-primary" style="flex:1;" onclick="confirmBooking()">Confirmar Agendamento ✓</button>
       </div>
+      <button class="btn-secondary" style="width:100%;margin-top:0.85rem;" onclick="confirmBookingWhatsApp()">Confirmar no WhatsApp</button>
     </div>
 
   </div>
@@ -1410,6 +1773,19 @@ nav {
     </main>
   </div>
 </div><!-- /screen-admin-dash -->
+
+<!-- FLOATING ACTIONS -->
+<a class="float-wa" href="https://wa.me/5511999999999" target="_blank" rel="noreferrer" aria-label="Falar no WhatsApp">WhatsApp</a>
+<div class="mobile-cta-bar" aria-label="Atalhos de agendamento">
+  <button type="button" onclick="showScreen('booking')">Agendar</button>
+  <a href="https://wa.me/5511999999999" target="_blank" rel="noreferrer">WhatsApp</a>
+</div>
+
+<!-- GALLERY MODAL -->
+<div class="gallery-modal" id="gallery-modal" aria-hidden="true">
+  <button class="gallery-modal-close" type="button" aria-label="Fechar imagem" onclick="closeGalleryModal()">×</button>
+  <img src="" alt="Galeria ampliada">
+</div>
 
 <!-- ============================================================
      JAVASCRIPT

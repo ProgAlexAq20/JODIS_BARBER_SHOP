@@ -44,11 +44,13 @@ const appState = {
   selectedBarber: null,
   selectedDate: null,
   selectedTime: null,
+  selectedDateMeta: null,
   services: [],
   adminServices: [],
   editingServiceId: null,
   barbers: [],
   businessSettings: null,
+  latestAppointment: null,
   isLoadingSlots: false
 };
 
@@ -59,6 +61,47 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function getBusinessSettingList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    return value.split(',').map(item => item.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function buildWhatsAppBookingMessage() {
+  if (!appState.latestAppointment) return '';
+
+  const appt = appState.latestAppointment;
+  return [
+    'Olá Jodi.',
+    '',
+    'Gostaria de confirmar meu horário:',
+    '',
+    `Nome: ${appt.clientName}`,
+    `Telefone: ${appt.clientPhone}`,
+    `Serviço: ${appt.serviceName}`,
+    `Barbeiro: ${appt.barberName}`,
+    `Data: ${appt.dateLabel || appt.date}`,
+    `Horário: ${appt.time}`,
+    '',
+    'Obrigado.'
+  ].join('\n');
+}
+
+function openWhatsAppBooking() {
+  const settings = appState.businessSettings || {};
+  const phone = String(settings.whatsappNumber || '5511999999999').replace(/\D/g, '') || '5511999999999';
+  const message = buildWhatsAppBookingMessage();
+
+  if (!message) {
+    showToast('Finalize o agendamento para gerar a mensagem do WhatsApp');
+    return;
+  }
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
 }
 
 // ════════════════════════════════════
@@ -185,6 +228,7 @@ export async function initBookingScreen() {
     
     // Sincroniza summary
     updateSummary();
+    renderCalendar();
   } catch (e) {
     console.error('Erro ao iniciar agendamento:', e);
     showToast('✗ Erro ao carregar dados. Tente novamente.');
@@ -261,12 +305,17 @@ window.selectBarberReal = function(barberId, el) {
 // Sobrescreve selectDay para carregar horários e capturar data
 const originalSelectDay = window.selectDay;
 window.selectDay = async function(el) {
-  originalSelectDay(el);
-  
   const dayText = el.textContent.trim();
   if (!dayText || el.classList.contains('disabled')) return;
 
+  originalSelectDay(el);
+
   appState.selectedDate = formatDateForFirestore(dayText);
+  appState.selectedDateMeta = {
+    year: calendarState.currentYear,
+    month: calendarState.currentMonth,
+    day: Number(dayText)
+  };
   updateSummary();
   await loadTimeSlotsForSelectedDate();
 };
@@ -283,8 +332,30 @@ window.selectTime = function(el) {
 // Sobrescreve confirmBooking para salvar no Firebase
 const originalConfirmBooking = window.confirmBooking;
 window.confirmBooking = async function() {
+  const clientSnapshot = {
+    name: document.getElementById('client-name')?.value || '',
+    phone: document.getElementById('client-phone')?.value || '',
+    email: document.getElementById('client-email')?.value || ''
+  };
+
   await handleConfirmBooking();
+
+  if (appState.selectedService && appState.selectedBarber && appState.selectedDate && appState.selectedTime && clientSnapshot.name && clientSnapshot.phone) {
+    appState.latestAppointment = {
+      appointmentKey: `${appState.selectedBarber.id}_${appState.selectedDate}_${appState.selectedTime.replace(':', '-')}`,
+      clientName: clientSnapshot.name,
+      clientPhone: clientSnapshot.phone,
+      clientEmail: clientSnapshot.email,
+      serviceName: appState.selectedService.name,
+      barberName: appState.selectedBarber.name,
+      date: appState.selectedDate,
+      time: appState.selectedTime,
+      dateLabel: formatDateLabel(appState.selectedDate)
+    };
+  }
 };
+
+window.confirmBookingWhatsApp = openWhatsAppBooking;
 
 async function handleConfirmBooking() {
   const name = document.getElementById('client-name')?.value;
@@ -373,38 +444,25 @@ function renderTimeSlots(slots) {
 }
 
 function formatDateForFirestore(dayText) {
-  // Busca o mês/ano visível no calendário UI
-  const monthEl = document.querySelector('#calendar-month-year, .cal-month');
-  if (!monthEl) {
-    // Fallback: usa data de hoje
-    return formatToday();
+  const meta = appState.selectedDateMeta;
+  if (meta?.year != null && meta?.month != null) {
+    return `${meta.year}-${String(meta.month + 1).padStart(2, '0')}-${String(dayText).padStart(2, '0')}`;
   }
-  
-  const text = monthEl.textContent.trim();
-  const parts = text.split(' ');
-  let monthStr, yearStr;
-  
-  if (parts.length >= 2) {
-    monthStr = parts[0];
-    yearStr = parts[1];
-  } else {
-    // Fallback para data atual
-    const now = new Date();
-    yearStr = String(now.getFullYear());
-    monthStr = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][now.getMonth() + 1];
-  }
-  
-  const months = {
-    'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04',
-    'Maio': '05', 'Junho': '06', 'Julho': '07', 'Agosto': '08',
-    'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'
-  };
-  
-  const month = months[monthStr] || '01';
-  const year = yearStr;
-  const day = String(dayText).padStart(2, '0');
 
-  return `${year}-${month}-${day}`;
+  return formatToday();
+}
+
+function formatDateLabel(dateIso) {
+  if (!dateIso || !/^\d{4}-\d{2}-\d{2}$/.test(dateIso)) return '';
+
+  const [year, month, day] = dateIso.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  return new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  }).format(date);
 }
 
 function updateSummary() {
@@ -592,6 +650,65 @@ export async function renderLandingBarbers() {
     console.error('Erro ao carregar barbeiros da landing:', e);
     container.innerHTML = '<p style="color: var(--muted);">Erro ao carregar barbeiros.</p>';
   }
+}
+
+export async function renderLandingServices() {
+  const container = document.getElementById('landing-services-grid');
+  if (!container) return;
+
+  try {
+    const services = appState.services.length ? appState.services : await getActiveServices();
+    appState.services = services;
+
+    if (!services.length) {
+      container.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Nenhum serviço disponível no momento.</p>';
+      return;
+    }
+
+    container.innerHTML = services.map(service => `
+      <div class="service-card premium-card fade-up">
+        <div class="premium-chip">${escapeHtml(service.durationMinutes)} min</div>
+        <div class="service-icon">✦</div>
+        <div class="service-name">${escapeHtml(service.name)}</div>
+        <div class="service-desc">${escapeHtml(service.description || 'Serviço premium personalizado para seu visual.')}</div>
+        <div class="service-price">R$ ${escapeHtml(Number(service.price || 0).toFixed(2))}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error('Erro ao carregar serviços da landing:', e);
+    container.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Erro ao carregar serviços.</p>';
+  }
+}
+
+window.openGalleryModal = function(src, caption = '') {
+  const modal = document.getElementById('gallery-modal');
+  const image = modal?.querySelector('img');
+  if (!modal || !image) return;
+
+  image.src = src || '';
+  image.alt = caption || 'Galeria ampliada';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+};
+
+window.closeGalleryModal = function() {
+  const modal = document.getElementById('gallery-modal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+};
+
+function initFaqAccordion() {
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const button = item.querySelector('.faq-question');
+    if (!button || button.dataset.bound === '1') return;
+    button.dataset.bound = '1';
+    button.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(other => other.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
 }
 
 // ════════════════════════════════════
@@ -1025,6 +1142,9 @@ function showScreen(name) {
   // Inicializa booking quando clica em "Agendar"
   if (name === 'booking') {
     initBookingScreen();
+  } else if (name === 'landing') {
+    renderLandingServices();
+    renderLandingBarbers();
   }
 }
 
@@ -1064,6 +1184,7 @@ function renderCalendar() {
   if (!monthEl || !daysContainer) return;
   
   const { currentYear, currentMonth } = calendarState;
+  const settings = appState.businessSettings || {};
   
   // Nomes dos meses em português
   const monthNames = [
@@ -1086,6 +1207,10 @@ function renderCalendar() {
   const todayMonth = today.getMonth();
   const todayYear = today.getFullYear();
   const isCurrentMonth = currentMonth === todayMonth && currentYear === todayYear;
+  const blockedWeekdays = new Set(getBusinessSettingList(settings.closedWeekdays).map(Number));
+  const blockedDates = new Set(getBusinessSettingList(settings.blockedDates));
+  const holidays = new Set(getBusinessSettingList(settings.holidays));
+  const blockSunday = settings.blockSunday !== false;
   
   // Dias da semana (labels)
   const dayLabels = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -1110,12 +1235,14 @@ function renderCalendar() {
     const dateObj = new Date(currentYear, currentMonth, day);
     const dayOfWeek = dateObj.getDay();
     const isToday = isCurrentMonth && day === todayDay;
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isoDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const isWeekend = dayOfWeek === 6 || (blockSunday && dayOfWeek === 0) || blockedWeekdays.has(dayOfWeek);
     const isPast = dateObj < new Date(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
+    const isBlocked = blockedDates.has(isoDate) || holidays.has(isoDate);
     
     let classes = 'cal-day';
     if (isToday) classes += ' today';
-    if (isWeekend || isPast) classes += ' disabled';
+    if (isWeekend || isPast || isBlocked) classes += ' disabled';
     
     html += `<div class="${classes}" onclick="selectDay(this)">${day}</div>`;
   }
@@ -1171,6 +1298,17 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Renderiza barbeiros na landing page quando estiver na tela de landing
   if (document.getElementById('screen-landing')) {
+    renderLandingServices();
     renderLandingBarbers();
+    initFaqAccordion();
+  }
+
+  const galleryModal = document.getElementById('gallery-modal');
+  if (galleryModal) {
+    galleryModal.addEventListener('click', (event) => {
+      if (event.target === galleryModal || event.target.classList.contains('gallery-modal-close')) {
+        window.closeGalleryModal();
+      }
+    });
   }
 });
