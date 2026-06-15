@@ -1674,9 +1674,19 @@ nav {
       <button class="login-tab active" onclick="setLoginTab(this,'barber')">Barbeiro</button>
       <button class="login-tab" onclick="setLoginTab(this,'admin')">Admin</button>
     </div>
-    <div class="form-field"><label class="form-label">E-mail</label><input id="login-email" class="form-input" type="email" placeholder="seu@jodis.com.br" /></div>
-    <div class="form-field"><label class="form-label">Senha</label><input id="login-password" class="form-input" type="password" placeholder="••••••••" /></div>
-    <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="doLogin()">Entrar</button>
+    <form id="login-form" onsubmit="doLogin(); return false;">
+      <div class="form-field">
+        <label class="form-label" for="login-email">E-mail</label>
+        <input id="login-email" class="form-input" type="email" autocomplete="username" placeholder="seu@jodis.com.br" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="login-password">Senha</label>
+        <input id="login-password" class="form-input" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+
+      <button class="btn-primary" type="submit" style="width:100%;margin-top:0.5rem;">Entrar</button>
+    </form>
     <p style="text-align:center;margin-top:1.5rem;font-size:0.72rem;color:var(--muted);">Esqueceu a senha? <a href="#" style="color:var(--gold-soft);">Recuperar</a></p>
   </div>
 </div><!-- /screen-login -->
