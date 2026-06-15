@@ -19,6 +19,13 @@ service cloud.firestore {
       );
     }
 
+    function isFinanceOrAdmin() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'finance'
+      );
+    }
+
     function isCurrentBarber(barberId) {
       return isSignedIn() &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'barber' &&
@@ -74,7 +81,7 @@ service cloud.firestore {
         && request.resource.data.servicePrice is number
         && request.resource.data.serviceDuration is number;
 
-      allow read: if isAdmin() || isCurrentBarber(resource.data.barberId);
+      allow read: if isAdmin() || isFinanceOrAdmin() || isCurrentBarber(resource.data.barberId);
 
       allow update: if isAdmin()
         || (
@@ -105,7 +112,7 @@ service cloud.firestore {
     }
 
     match /exports/{exportId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAdmin() || isFinanceOrAdmin();
     }
   }
 }

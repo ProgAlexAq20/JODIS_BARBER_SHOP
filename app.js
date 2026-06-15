@@ -77,6 +77,10 @@ export function initAuth() {
     if (user.role === 'admin') {
       showScreen('admin-dash');
       initAdminDashboard();
+    } else if (user.role === 'finance') {
+      showScreen('admin-dash');
+      initAdminDashboard();
+      setTimeout(() => showFinancePanel(), 0);
     } else if (user.role === 'barber') {
       showScreen('barber-dash');
       initBarberDashboard(user);
@@ -122,8 +126,8 @@ window.handleLogout = handleLogout;
 
 window.exportAdminData = async function() {
   try {
-    if (!appState.currentUser || appState.currentUser.role !== 'admin') {
-      showToast('âœ— Apenas administradores podem exportar dados');
+    if (!appState.currentUser || !['admin', 'finance'].includes(appState.currentUser.role)) {
+      showToast('âœ— Apenas administradores financeiros podem exportar dados');
       return;
     }
 
@@ -663,8 +667,8 @@ function renderAdminAppointments(appts) {
 // ════════════════════════════════════
 async function showFinancePanel() {
   try {
-    if (!appState.currentUser || appState.currentUser.role !== 'admin') {
-      showToast('âœ— Apenas administradores podem acessar o financeiro');
+    if (!appState.currentUser || !['admin', 'finance'].includes(appState.currentUser.role)) {
+      showToast('âœ— Apenas administradores financeiros podem acessar o financeiro');
       return;
     }
 

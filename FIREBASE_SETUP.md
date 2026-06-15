@@ -24,6 +24,18 @@ No Firestore, crie manualmente (ou via admin SDK):
 }
 ```
 
+**users/FINANCE_UID:**
+```json
+{
+  "active": true,
+  "barberId": "",
+  "createdAt": timestamp,
+  "email": "financeiro@jodis.com",
+  "name": "Financeiro Jodi's",
+  "role": "finance"
+}
+```
+
 **users/BARBER_UID:**
 ```json
 {
@@ -97,9 +109,12 @@ No Firebase Console:
 
 No Firebase Console → **Authentication**:
 - [ ] Crie usuário admin@jodis.com com qualquer senha
+- [ ] Crie usuário financeiro@jodis.com com qualquer senha
 - [ ] Crie usuário jodi@jodis.com com qualquer senha
 - [ ] Copie os UIDs desses usuários
 - [ ] Cole nos documentos users/{uid} que criou no Firestore
+
+> Segurança: não salve segredos do Firebase Admin SDK ou credenciais privadas no Git. A configuração web do Firebase é pública por design; chaves de servidor e service accounts devem ficar fora do repositório.
 
 ---
 
