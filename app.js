@@ -199,6 +199,18 @@ function setAuthLoading(isLoading) {
   if (overlay) overlay.hidden = !isLoading;
 }
 
+function startAuthFallbackTimer() {
+  window.clearTimeout(window.__authFallbackTimer);
+  window.__authFallbackTimer = window.setTimeout(() => {
+    if (!appState.authResolved) {
+      setAuthLoading(false);
+      if (!appState.currentUser) {
+        showScreen('landing');
+      }
+    }
+  }, 3500);
+}
+
 // ════════════════════════════════════
 // AUTH & REDIRECT
 // ════════════════════════════════════
@@ -208,9 +220,11 @@ let unsubscribeAuth = null;
 export function initAuth() {
   try {
     setAuthLoading(true);
+    startAuthFallbackTimer();
     unsubscribeAuth = onAuthChange(async (user) => {
       appState.currentUser = normalizeUserAccess(user);
       appState.authResolved = true;
+      window.clearTimeout(window.__authFallbackTimer);
       syncRestrictedUi();
       setAuthLoading(false);
       
@@ -240,6 +254,7 @@ export function initAuth() {
   } catch (e) {
     console.error('Firebase auth indisponível:', e);
     setAuthLoading(false);
+    window.clearTimeout(window.__authFallbackTimer);
     showToast('Firebase indisponível. Verifique a configuração do projeto.');
     showScreen('landing');
   }
@@ -1463,6 +1478,11 @@ document.addEventListener('DOMContentLoaded', () => {
   syncRestrictedUi();
   initAuth();
   initCalendar();
+  window.addEventListener('load', () => {
+    if (!appState.authResolved) {
+      setAuthLoading(false);
+    }
+  });
   
   // Configura botões de navegação do calendário
   const calNavButtons = document.querySelectorAll('.cal-nav');
