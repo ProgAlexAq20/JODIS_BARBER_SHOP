@@ -200,13 +200,46 @@ nav {
 /* ============================================================
    SCREENS
    ============================================================ */
-.screen { display: none; min-height: 100vh; }
-.screen.active { display: block; }
-#screen-login.active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: block; }
+  #screen-login.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #screen-access-denied.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 1.5rem 3rem;
+  }
+  .access-denied-card {
+    width: min(560px, 100%);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(26,26,26,0.96), rgba(12,12,12,0.98));
+    box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+    border-radius: 24px;
+    padding: clamp(1.5rem, 4vw, 2.4rem);
+    text-align: center;
+  }
+  .access-denied-icon {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 1.25rem;
+    background: radial-gradient(circle at top, rgba(212,175,55,0.35), rgba(176,141,87,0.12));
+    color: var(--gold);
+    font-size: 2rem;
+    box-shadow: 0 0 0 1px rgba(212,175,55,0.16), 0 0 32px rgba(212,175,55,0.12);
+  }
+  .access-denied-card p {
+    color: var(--muted);
+    line-height: 1.8;
+    margin: 0 auto 1.5rem;
+    max-width: 42ch;
+  }
 
 /* ============================================================
    HERO — VIDEO
@@ -1187,7 +1220,7 @@ nav {
     <li><a href="#" onclick="showScreen('booking')">Agendar</a></li>
   </ul>
   <div class="nav-btn">
-    <button class="nav-area-btn" onclick="showScreen('login')">Área Restrita</button>
+    <button class="nav-area-btn" id="desktop-area-btn" hidden onclick="showScreen('login')">Área Restrita</button>
     <button class="nav-cta" onclick="showScreen('booking')">Reservar Horário</button>
     <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -1203,7 +1236,7 @@ nav {
     <a href="#" onclick="scrollSection('barbers');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border);">Barbeiros</a>
     <a href="#" onclick="scrollSection('gallery');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border);">Galeria</a>
     <a href="#" onclick="showScreen('booking');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--border);">Agendar</a>
-    <a href="#" onclick="showScreen('login');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;">Área Restrita</a>
+    <a id="mobile-area-link" hidden href="#" onclick="showScreen('login');toggleMobileMenu();" style="padding:1.2rem 0;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;">Área Restrita</a>
   </nav>
   <button class="btn-primary" style="margin-top:2rem;width:100%;" onclick="showScreen('booking');toggleMobileMenu();">Reservar Meu Horário</button>
 </div>
@@ -1625,6 +1658,22 @@ nav {
     <p style="text-align:center;margin-top:1.5rem;font-size:0.72rem;color:var(--muted);">Esqueceu a senha? <a href="#" style="color:var(--gold-soft);">Recuperar</a></p>
   </div>
 </div><!-- /screen-login -->
+
+<!-- ============================================================
+     ACCESS DENIED
+     ============================================================ -->
+<div id="screen-access-denied" class="screen">
+  <div class="access-denied-card">
+    <div class="access-denied-icon">⛨</div>
+    <p style="font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-soft);margin-bottom:0.8rem;">Acesso restrito</p>
+    <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.7rem);margin-bottom:0.8rem;">Você chegou a uma área privada</h2>
+    <p>Essa seção é exclusiva da equipe. Se você é administrador, financeiro ou barbeiro autorizado, faça login para continuar. Caso contrário, volte para a página inicial e faça seu agendamento.</p>
+    <div style="display:flex;gap:0.9rem;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="showScreen('login')">Fazer login</button>
+      <button class="btn-secondary" onclick="showScreen('landing')">Voltar ao site</button>
+    </div>
+  </div>
+</div><!-- /screen-access-denied -->
 
 <!-- ============================================================
      BARBER DASHBOARD

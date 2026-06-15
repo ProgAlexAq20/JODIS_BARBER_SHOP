@@ -122,6 +122,36 @@ function canAccessScreen(name) {
   return true;
 }
 
+function syncRestrictedUi() {
+  const allowed = Boolean(appState.currentUser);
+  const desktopBtn = document.getElementById('desktop-area-btn');
+  const mobileLink = document.getElementById('mobile-area-link');
+
+  if (desktopBtn) desktopBtn.hidden = !allowed;
+  if (mobileLink) mobileLink.hidden = !allowed;
+}
+
+function showDataWarning(message) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 5500);
+}
+
+function showAccessDenied(reason = 'Você não tem permissão para acessar esta área.') {
+  const target = document.getElementById('screen-access-denied');
+  if (!target) {
+    showScreen('login');
+    return;
+  }
+
+  const message = target.querySelector('.access-denied-card p:nth-of-type(2)');
+  if (message) message.textContent = reason;
+
+  showScreen('access-denied');
+}
+
 // ════════════════════════════════════
 // AUTH & REDIRECT
 // ════════════════════════════════════
@@ -132,6 +162,7 @@ export function initAuth() {
   try {
     unsubscribeAuth = onAuthChange(async (user) => {
       appState.currentUser = user;
+      syncRestrictedUi();
       
       if (!user) {
         // Usuário deslogado
@@ -153,7 +184,7 @@ export function initAuth() {
         showScreen('barber-dash');
         initBarberDashboard(user);
       } else {
-        showScreen('login');
+        showAccessDenied('Sua conta não possui permissão para acessar o painel interno.');
       }
     });
   } catch (e) {
@@ -257,6 +288,14 @@ export async function initBookingScreen() {
     // Sincroniza summary
     updateSummary();
     renderCalendar();
+
+    if (!appState.businessSettings) {
+      showDataWarning('Firebase conectado, mas settings/business não foi encontrado.');
+    } else if (appState.services.length === 0) {
+      showDataWarning('Firebase conectado, mas services está vazio. Rode o seed local.');
+    } else if (appState.barbers.length === 0) {
+      showDataWarning('Firebase conectado, mas barbers está vazio. Verifique o seed.');
+    }
   } catch (e) {
     console.error('Erro ao iniciar agendamento:', e);
     showToast('✗ Erro ao carregar dados. Tente novamente.');
@@ -662,7 +701,7 @@ export async function renderLandingBarbers() {
     const barbers = await getActiveBarbers();
     
     if (barbers.length === 0) {
-      container.innerHTML = '<p style="color: var(--muted);">Carregando barbeiros...</p>';
+      container.innerHTML = '<p style="color: var(--muted);">Nenhum barbeiro disponível no Firestore.</p>';
       return;
     }
 
@@ -676,7 +715,7 @@ export async function renderLandingBarbers() {
     `).join('');
   } catch (e) {
     console.error('Erro ao carregar barbeiros da landing:', e);
-    container.innerHTML = '<p style="color: var(--muted);">Erro ao carregar barbeiros.</p>';
+    container.innerHTML = '<p style="color: var(--muted);">Erro ao carregar barbeiros. Verifique o Firestore.</p>';
   }
 }
 
@@ -689,7 +728,7 @@ export async function renderLandingServices() {
     appState.services = services;
 
     if (!services.length) {
-      container.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Nenhum serviço disponível no momento.</p>';
+      container.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Nenhum serviço disponível no Firestore.</p>';
       return;
     }
 
@@ -704,7 +743,7 @@ export async function renderLandingServices() {
     `).join('');
   } catch (e) {
     console.error('Erro ao carregar serviços da landing:', e);
-    container.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Erro ao carregar serviços.</p>';
+    container.innerHTML = '<p style="color: var(--muted); grid-column: 1/-1;">Erro ao carregar serviços. Verifique o Firestore.</p>';
   }
 }
 
@@ -1158,8 +1197,8 @@ function showToast(msg) {
 
 function showScreen(name) {
   if (!canAccessScreen(name)) {
-    showToast('Acesso restrito. Faça login com uma conta autorizada.');
-    name = 'login';
+    showAccessDenied('Acesso restrito. Faça login com uma conta autorizada.');
+    return;
   }
 
   document.querySelectorAll('.screen').forEach(s => {
@@ -1319,6 +1358,7 @@ function calendarNextMonth() {
 // ════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
+  syncRestrictedUi();
   initAuth();
   initCalendar();
   
