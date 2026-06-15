@@ -1802,6 +1802,7 @@ nav {
   window.firebaseApp = initializeApp(config.firebaseConfig);
   window.auth = getAuth(window.firebaseApp);
   window.db = getFirestore(window.firebaseApp);
+  window.firebaseReady = true;
 </script>
 
 <!-- App Logic -->

@@ -22,6 +22,12 @@ import {
   updateDoc,
   onSnapshot
 } from 'https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js';
+
+function ensureFirebaseReady() {
+  if (!window.auth || !window.db) {
+    throw new Error('Firebase não inicializado. Verifique a conexão e o arquivo firebase-config.js.');
+  }
+}
  
 // ════════════════════════════════════
 // AUTH
@@ -29,6 +35,7 @@ import {
  
 export async function loginWithEmail(email, password) {
   try {
+    ensureFirebaseReady();
     const userCred = await signInWithEmailAndPassword(window.auth, email, password);
     const user = userCred.user;
     const userDoc = await getDoc(doc(window.db, 'users', user.uid));
@@ -43,10 +50,12 @@ export async function loginWithEmail(email, password) {
 }
  
 export async function logoutUser() {
+  ensureFirebaseReady();
   return signOut(window.auth);
 }
- 
+
 export function onAuthChange(callback) {
+  ensureFirebaseReady();
   return onAuthStateChanged(window.auth, async (user) => {
     if (!user) {
       callback(null);
@@ -68,6 +77,7 @@ export function onAuthChange(callback) {
  
 export async function getActiveServices() {
   try {
+    ensureFirebaseReady();
     const q = query(
       collection(window.db, 'services'),
       where('active', '==', true)
@@ -83,6 +93,7 @@ export async function getActiveServices() {
 
 export async function getAllServices() {
   try {
+    ensureFirebaseReady();
     const snap = await getDocs(collection(window.db, 'services'));
     return snap.docs.map(d => ({ id: d.id, ...d.data() }))
       .sort((a, b) => (a.order || 999) - (b.order || 999));
@@ -103,6 +114,7 @@ function slugifyServiceName(name) {
 }
 
 export async function createService(serviceData) {
+  ensureFirebaseReady();
   const name = String(serviceData.name || '').trim();
   if (!name) throw new Error('Nome do serviço é obrigatório');
   if (serviceData.price === '' || serviceData.price === undefined || Number.isNaN(Number(serviceData.price))) {
@@ -129,6 +141,7 @@ export async function createService(serviceData) {
 }
 
 export async function updateService(serviceId, serviceData) {
+  ensureFirebaseReady();
   if (!serviceId) throw new Error('ID do serviço inválido');
   const name = String(serviceData.name || '').trim();
   if (!name) throw new Error('Nome do serviço é obrigatório');
@@ -148,6 +161,7 @@ export async function updateService(serviceId, serviceData) {
 }
 
 export async function deleteService(serviceId) {
+  ensureFirebaseReady();
   if (!serviceId) throw new Error('ID do serviço inválido');
   await deleteDoc(doc(window.db, 'services', serviceId));
   return { success: true };
@@ -159,6 +173,7 @@ export async function deleteService(serviceId) {
  
 export async function getActiveBarbers() {
   try {
+    ensureFirebaseReady();
     const q = query(
       collection(window.db, 'barbers'),
       where('active', '==', true)
@@ -178,6 +193,7 @@ export async function getActiveBarbers() {
  
 export async function getBusinessSettings() {
   try {
+    ensureFirebaseReady();
     const snap = await getDoc(doc(window.db, 'settings', 'business'));
     return snap.exists() ? snap.data() : null;
   } catch (e) {
@@ -196,6 +212,7 @@ export async function getBusinessSettings() {
  * retorna todos os slots gerados (validação de conflito fica no setDoc via Rules).
  */
 export async function getAvailableSlots(barberId, dateStr) {
+  ensureFirebaseReady();
   const settings = await getBusinessSettings();
   if (!settings) return [];
  
@@ -242,6 +259,7 @@ export async function getAvailableSlots(barberId, dateStr) {
  * As Firestore Rules bloqueiam update (já existente), permitindo apenas create.
  */
 export async function createAppointment(appointmentData) {
+  ensureFirebaseReady();
   // appointmentKey deve ser: `${barberId}_${date}_${time}` — gerado pelo caller
   const appointmentId = appointmentData.appointmentKey;
 

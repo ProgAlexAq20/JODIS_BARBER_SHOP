@@ -104,6 +104,24 @@ function openWhatsAppBooking() {
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
 }
 
+function canAccessScreen(name) {
+  const role = appState.currentUser?.role || null;
+
+  if (name === 'admin-dash') {
+    return ['admin', 'finance'].includes(role);
+  }
+
+  if (name === 'barber-dash') {
+    return ['admin', 'barber'].includes(role);
+  }
+
+  if (name === 'login') {
+    return true;
+  }
+
+  return true;
+}
+
 // ════════════════════════════════════
 // AUTH & REDIRECT
 // ════════════════════════════════════
@@ -111,30 +129,40 @@ function openWhatsAppBooking() {
 let unsubscribeAuth = null;
 
 export function initAuth() {
-  unsubscribeAuth = onAuthChange(async (user) => {
-    appState.currentUser = user;
-    
-    if (!user) {
-      // Usuário deslogado
-      if (!['landing', 'booking'].includes(getCurrentScreen())) {
+  try {
+    unsubscribeAuth = onAuthChange(async (user) => {
+      appState.currentUser = user;
+      
+      if (!user) {
+        // Usuário deslogado
+        if (!['landing', 'booking'].includes(getCurrentScreen())) {
+          showScreen('login');
+        }
+        return;
+      }
+
+      // Usuário logado - redireciona conforme role
+      if (user.role === 'admin') {
+        showScreen('admin-dash');
+        initAdminDashboard();
+      } else if (user.role === 'finance') {
+        showScreen('admin-dash');
+        initAdminDashboard();
+        setTimeout(() => showFinancePanel(), 0);
+      } else if (user.role === 'barber') {
+        showScreen('barber-dash');
+        initBarberDashboard(user);
+      } else {
         showScreen('login');
       }
-      return;
+    });
+  } catch (e) {
+    console.error('Firebase auth indisponível:', e);
+    showToast('Firebase indisponível. Verifique a configuração do projeto.');
+    if (getCurrentScreen() !== 'landing') {
+      showScreen('landing');
     }
-
-    // Usuário logado - redireciona conforme role
-    if (user.role === 'admin') {
-      showScreen('admin-dash');
-      initAdminDashboard();
-    } else if (user.role === 'finance') {
-      showScreen('admin-dash');
-      initAdminDashboard();
-      setTimeout(() => showFinancePanel(), 0);
-    } else if (user.role === 'barber') {
-      showScreen('barber-dash');
-      initBarberDashboard(user);
-    }
-  });
+  }
 }
 
 function getCurrentScreen() {
@@ -1129,6 +1157,11 @@ function showToast(msg) {
 }
 
 function showScreen(name) {
+  if (!canAccessScreen(name)) {
+    showToast('Acesso restrito. Faça login com uma conta autorizada.');
+    name = 'login';
+  }
+
   document.querySelectorAll('.screen').forEach(s => {
     s.style.display = 'none';
     s.classList.remove('active');
