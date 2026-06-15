@@ -26,6 +26,8 @@ async function seed() {
     closeHour: '18:00',
     slotIntervalMinutes: 30,
     closedWeekdays: [0],
+    blockedDates: [],
+    holidays: [],
     timezone: 'America/Sao_Paulo',
     whatsapp: '5511999999999',
     whatsappNumber: '5511999999999',

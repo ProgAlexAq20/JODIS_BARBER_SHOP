@@ -20,6 +20,8 @@ Para popular o banco de forma controlada no seu ambiente local:
 npm init -y
 npm install firebase-admin
 node seed-firestore.js
+node seed-users.js
+node backup-firestore.js
 ```
 
 Coloque o arquivo `serviceAccountKey.json` na raiz do projeto apenas na sua máquina. Nunca envie esse arquivo para o GitHub.

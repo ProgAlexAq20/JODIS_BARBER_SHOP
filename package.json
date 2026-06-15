@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "description": "Jodi's Barbershop booking site and admin dashboard",
   "scripts": {
-    "seed:firestore": "node seed-firestore.js"
+    "seed:firestore": "node seed-firestore.js",
+    "seed:users": "node seed-users.js",
+    "backup:firestore": "node backup-firestore.js"
   },
   "dependencies": {
     "firebase-admin": "^14.0.0"
