@@ -12,6 +12,18 @@
 
 No Firestore, crie manualmente (ou via admin SDK):
 
+### Seed local recomendado
+
+Para popular o banco de forma controlada no seu ambiente local:
+
+```bash
+npm init -y
+npm install firebase-admin
+node seed-firestore.js
+```
+
+Coloque o arquivo `serviceAccountKey.json` na raiz do projeto apenas na sua máquina. Nunca envie esse arquivo para o GitHub.
+
 **users/ADMIN_UID:**
 ```json
 {
@@ -69,7 +81,10 @@ No Firestore, crie manualmente (ou via admin SDK):
   "openHour": "09:00",
   "closeHour": "18:00",
   "slotIntervalMinutes": 30,
-  "openDays": [1, 2, 3, 4, 5, 6]
+  "closedWeekdays": [0],
+  "timezone": "America/Sao_Paulo",
+  "whatsapp": "5511999999999",
+  "whatsappNumber": "5511999999999"
 }
 ```
 

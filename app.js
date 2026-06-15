@@ -93,7 +93,7 @@ function buildWhatsAppBookingMessage() {
 
 function openWhatsAppBooking() {
   const settings = appState.businessSettings || {};
-  const phone = String(settings.whatsappNumber || '5511999999999').replace(/\D/g, '') || '5511999999999';
+  const phone = String(settings.whatsappNumber || settings.whatsapp || '5511999999999').replace(/\D/g, '') || '5511999999999';
   const message = buildWhatsAppBookingMessage();
 
   if (!message) {

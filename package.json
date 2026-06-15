@@ -1,0 +1,12 @@
+{
+  "name": "jodis-barber-system",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Jodi's Barbershop booking site and admin dashboard",
+  "scripts": {
+    "seed:firestore": "node seed-firestore.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.0.0"
+  }
+}
