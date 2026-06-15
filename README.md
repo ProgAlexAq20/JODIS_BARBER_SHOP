@@ -1,39 +1,257 @@
-# Jodi's Barbershop — Premium Frontend
+# Jodi's Barbershop
 
-Premium presentation frontend for **Jodi's Barbershop**, a barbershop located in Jd. Imperador.
+Sistema moderno de agendamento online para barbearias, desenvolvido com HTML, CSS, JavaScript e Firebase.
 
-This project was created as a first visual version to present the proposal for a complete system for scheduling, managing barbers, clients, and billing.
+## Visão Geral
+
+A Jodi's Barbershop é uma plataforma criada para modernizar o processo de atendimento e agendamento de clientes, reduzindo a dependência de WhatsApp e Instagram para marcação de horários e proporcionando uma experiência mais profissional para clientes e colaboradores.
+
+### Principais Benefícios
+
+* Agendamento online 24 horas por dia
+* Redução do volume de mensagens no WhatsApp
+* Organização automática da agenda
+* Controle de disponibilidade dos barbeiros
+* Evita conflitos e sobreposição de horários
+* Dashboard administrativo
+* Dashboard individual para barbeiros
+* Integração com Firebase Authentication
+* Integração com Firestore Database
+* Design premium responsivo
+* Preparado para estratégias de fidelização
 
 ---
 
-## Project Vision
+## Tecnologias
 
-The idea is to create a modern digital experience for the barbershop, focused on:
+### Frontend
 
-- quick scheduling for clients;
-- premium visual inspired by the real identity of the barbershop;
-- restricted area for barbers;
-- administrative panel for managing schedule, clients, and profit;
-- structure prepared for future backend integration.
+* HTML5
+* CSS3
+* JavaScript (Vanilla)
 
-At this stage, the project is only **static frontend**, using simulated data.
+### Backend
+
+* Firebase Authentication
+* Cloud Firestore
+
+### Hospedagem
+
+* GitHub Pages
 
 ---
 
-## Visual Style
+## Estrutura do Projeto
 
-The project follows the concept:
+```text
+JODIS_BARBER_SHOP/
 
-**Luxury Dark Barbershop**
+├── index.html
+├── app.js
+├── firebase-config.js
+├── firebase-service.js
+├── firestore.rules
+├── manifest.json
+│
+├── assets/
+│   ├── imagens
+│   ├── ícones
+│   ├── vídeos
+│   └── logos
+│
+└── README.md
+```
 
-Main palette:
+---
 
-```css
---black: #0B0B0B;
---dark: #121212;
---card: #1A1A1A;
---wood-deep: #3B2A1F;
---wood: #4A3426;
---gold-soft: #B08D57;
---gold: #D4AF37;
---white: #F5F55S
+## Funcionalidades
+
+### Cliente
+
+* Visualização dos serviços
+* Visualização dos barbeiros
+* Galeria da barbearia
+* Agendamento online
+* Escolha de serviço
+* Escolha de barbeiro
+* Escolha de data e horário
+* Confirmação de agendamento
+
+### Barbeiro
+
+* Login seguro
+* Visualização da agenda do dia
+* Atualização de status dos atendimentos
+* Histórico de atendimentos
+* Controle de clientes
+
+### Administrador
+
+* Gestão de barbeiros
+* Gestão de serviços
+* Gestão de agendamentos
+* Controle financeiro
+* Relatórios operacionais
+* Exportação de dados
+
+---
+
+## Estrutura do Firestore
+
+### settings
+
+```javascript
+settings/business
+```
+
+Exemplo:
+
+```javascript
+{
+  openHour: "09:00",
+  closeHour: "18:00",
+  slotIntervalMinutes: 30,
+  timezone: "America/Sao_Paulo"
+}
+```
+
+---
+
+### services
+
+```javascript
+services/{serviceId}
+```
+
+Exemplo:
+
+```javascript
+{
+  name: "Corte Clássico",
+  price: 60,
+  durationMinutes: 30,
+  active: true
+}
+```
+
+---
+
+### barbers
+
+```javascript
+barbers/{barberId}
+```
+
+Exemplo:
+
+```javascript
+{
+  name: "Jodi",
+  active: true,
+  roleTitle: "Master Barber"
+}
+```
+
+---
+
+### appointments
+
+```javascript
+appointments/{appointmentId}
+```
+
+Exemplo:
+
+```javascript
+{
+  clientName: "João",
+  clientPhone: "(11)99999-9999",
+  serviceName: "Corte Clássico",
+  barberName: "Jodi",
+  date: "2026-06-14",
+  time: "15:00",
+  status: "confirmed"
+}
+```
+
+---
+
+### users
+
+```javascript
+users/{uid}
+```
+
+Exemplo:
+
+```javascript
+{
+  name: "Jodi",
+  email: "joi@jodis.com",
+  role: "barber",
+  active: true,
+  barberId: "jodi"
+}
+```
+
+---
+
+## Segurança
+
+O projeto utiliza:
+
+* Firebase Authentication
+* Firestore Security Rules
+* Controle por roles:
+
+  * admin
+  * barber
+  * finance
+
+Permissões são controladas tanto no frontend quanto nas regras do Firestore.
+
+---
+
+## Fidelização de Clientes
+
+O sistema foi projetado para suportar futuras funcionalidades de retenção:
+
+* Cupons promocionais
+* Desconto para primeiro agendamento
+* Programa de selos
+* Cashback
+* Benefícios por recorrência
+* Campanhas sazonais
+
+---
+
+## Roadmap
+
+### Em desenvolvimento
+
+* Calendário dinâmico completo
+* Integração WhatsApp
+* Dashboard financeiro avançado
+* Exportação CSV
+* Google Reviews
+* Programa de fidelidade
+* Notificações automáticas
+
+---
+
+## Performance
+
+Metas do projeto:
+
+* Lighthouse Performance > 95
+* Lighthouse SEO > 95
+* Lighthouse Accessibility > 95
+* Lighthouse Best Practices > 95
+
+---
+
+## Licença
+
+Projeto privado desenvolvido para uso da Jodi's Barbershop.
+
+Todos os direitos reservados.
