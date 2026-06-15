@@ -12,6 +12,7 @@ import {
 import {
   collection,
   doc,
+  deleteDoc,
   getDoc,
   getDocs,
   query,
@@ -79,7 +80,79 @@ export async function getActiveServices() {
     return [];
   }
 }
- 
+
+export async function getAllServices() {
+  try {
+    const snap = await getDocs(collection(window.db, 'services'));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.order || 999) - (b.order || 999));
+  } catch (e) {
+    console.error('Erro ao carregar todos os serviços:', e);
+    return [];
+  }
+}
+
+function slugifyServiceName(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || `service_${Date.now()}`;
+}
+
+export async function createService(serviceData) {
+  const name = String(serviceData.name || '').trim();
+  if (!name) throw new Error('Nome do serviço é obrigatório');
+  if (serviceData.price === '' || serviceData.price === undefined || Number.isNaN(Number(serviceData.price))) {
+    throw new Error('Preço do serviço é obrigatório');
+  }
+  if (serviceData.durationMinutes === '' || serviceData.durationMinutes === undefined || Number.isNaN(Number(serviceData.durationMinutes))) {
+    throw new Error('Duração do serviço é obrigatória');
+  }
+
+  const id = serviceData.id || slugifyServiceName(name);
+  const payload = {
+    name,
+    price: Number(serviceData.price),
+    durationMinutes: Number(serviceData.durationMinutes),
+    active: Boolean(serviceData.active),
+    order: Number(serviceData.order || 999),
+    description: String(serviceData.description || '').trim(),
+    updatedAt: new Date(),
+    createdAt: new Date()
+  };
+
+  await setDoc(doc(window.db, 'services', id), payload, { merge: true });
+  return { id, ...payload };
+}
+
+export async function updateService(serviceId, serviceData) {
+  if (!serviceId) throw new Error('ID do serviço inválido');
+  const name = String(serviceData.name || '').trim();
+  if (!name) throw new Error('Nome do serviço é obrigatório');
+
+  const payload = {
+    name,
+    price: Number(serviceData.price),
+    durationMinutes: Number(serviceData.durationMinutes),
+    active: Boolean(serviceData.active),
+    order: Number(serviceData.order || 999),
+    description: String(serviceData.description || '').trim(),
+    updatedAt: new Date()
+  };
+
+  await updateDoc(doc(window.db, 'services', serviceId), payload);
+  return { id: serviceId, ...payload };
+}
+
+export async function deleteService(serviceId) {
+  if (!serviceId) throw new Error('ID do serviço inválido');
+  await deleteDoc(doc(window.db, 'services', serviceId));
+  return { success: true };
+}
+
 // ════════════════════════════════════
 // BARBERS
 // ════════════════════════════════════

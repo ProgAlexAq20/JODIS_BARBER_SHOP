@@ -8,6 +8,7 @@ import {
   logoutUser,
   onAuthChange,
   getActiveServices,
+  getAllServices,
   getActiveBarbers,
   getBusinessSettings,
   getAvailableSlots,
@@ -19,7 +20,10 @@ import {
   getMonthKPIs,
   getBarberDayKPIs,
   getBarberMonthKPIs,
-  exportMonthlySnapshotToFirestore
+  exportMonthlySnapshotToFirestore,
+  createService,
+  updateService,
+  deleteService
 } from './firebase-service.js';
 
 // Firebase imports inline para uso em dashboards
@@ -41,6 +45,8 @@ const appState = {
   selectedDate: null,
   selectedTime: null,
   services: [],
+  adminServices: [],
+  editingServiceId: null,
   barbers: [],
   businessSettings: null,
   isLoadingSlots: false
@@ -746,6 +752,211 @@ async function showFinancePanel() {
 }
 
 window.showFinancePanel = showFinancePanel;
+
+async function showServicesPanel() {
+  try {
+    if (!appState.currentUser || appState.currentUser.role !== 'admin') {
+      showToast('âœ— Apenas administradores podem gerenciar serviços');
+      return;
+    }
+
+    appState.adminServices = await getAllServices();
+    appState.editingServiceId = null;
+
+    const root = document.getElementById('admin-main');
+    if (!root) return;
+
+    root.innerHTML = `
+      <div class="dash-header">
+        <div>
+          <h1 class="dash-greeting">Serviços</h1>
+          <p class="dash-date">Gerencie catálogo, preços, duração e status de exibição</p>
+        </div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+          <button class="btn-secondary" style="font-size:0.7rem;padding:0.55rem 1.1rem;" onclick="showScreen('admin-dash')">← Voltar</button>
+          <button class="btn-primary" style="font-size:0.7rem;padding:0.55rem 1.1rem;" onclick="resetServiceForm()">Novo serviço</button>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-card-title" id="service-form-title">Novo serviço</div>
+          <div style="display:grid;gap:0.85rem;">
+            <div>
+              <label class="form-label">Nome</label>
+              <input id="service-name" class="form-input" type="text" placeholder="Corte Clássico" />
+            </div>
+            <div>
+              <label class="form-label">Descrição</label>
+              <textarea id="service-description" class="form-input" rows="3" placeholder="Descrição curta do serviço"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
+              <div>
+                <label class="form-label">Preço</label>
+                <input id="service-price" class="form-input" type="number" min="0" step="0.01" placeholder="50" />
+              </div>
+              <div>
+                <label class="form-label">Duração (min)</label>
+                <input id="service-duration" class="form-input" type="number" min="5" step="5" placeholder="30" />
+              </div>
+              <div>
+                <label class="form-label">Ordem</label>
+                <input id="service-order" class="form-input" type="number" min="1" step="1" placeholder="1" />
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+              <input id="service-active" type="checkbox" checked />
+              <label for="service-active" class="form-label" style="margin:0;">Ativo na vitrine</label>
+            </div>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+              <button class="btn-primary" onclick="saveServiceFromForm()">Salvar serviço</button>
+              <button class="btn-secondary" onclick="clearServiceForm()">Limpar</button>
+            </div>
+            <p style="color:var(--muted);font-size:0.78rem;line-height:1.6;">
+              O ID do documento é gerado automaticamente a partir do nome, mas você pode editar o registro existente sem perder o vínculo do agendamento.
+            </p>
+          </div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">Catálogo atual</div>
+          <div id="service-admin-list" style="display:flex;flex-direction:column;gap:0.8rem;"></div>
+        </div>
+      </div>
+    `;
+
+    renderServiceAdminList();
+  } catch (e) {
+    console.error('Erro ao abrir serviços:', e);
+    showToast('âœ— Não foi possível abrir o painel de serviços');
+  }
+}
+
+function renderServiceAdminList() {
+  const list = document.getElementById('service-admin-list');
+  if (!list) return;
+
+  if (!appState.adminServices.length) {
+    list.innerHTML = '<p style="color: var(--muted);">Nenhum serviço cadastrado ainda.</p>';
+    return;
+  }
+
+  list.innerHTML = appState.adminServices.map(service => `
+    <div class="team-row" style="align-items:flex-start;">
+      <div style="min-width:0;">
+        <div class="team-name">${escapeHtml(service.name)}</div>
+        <div class="team-role">${escapeHtml(service.description || 'Sem descrição')}</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:0.35rem;">
+          ${escapeHtml(service.durationMinutes)} min · R$ ${escapeHtml(Number(service.price || 0).toFixed(2))} · ${service.active ? 'Ativo' : 'Inativo'}
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="btn-secondary" style="font-size:0.68rem;padding:0.45rem 0.85rem;" onclick='editService(${JSON.stringify(service.id)})'>Editar</button>
+        <button class="btn-secondary" style="font-size:0.68rem;padding:0.45rem 0.85rem;" onclick='removeService(${JSON.stringify(service.id)})'>Apagar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function clearServiceForm() {
+  appState.editingServiceId = null;
+  const fields = {
+    name: document.getElementById('service-name'),
+    description: document.getElementById('service-description'),
+    price: document.getElementById('service-price'),
+    duration: document.getElementById('service-duration'),
+    order: document.getElementById('service-order'),
+    active: document.getElementById('service-active'),
+    title: document.getElementById('service-form-title')
+  };
+
+  if (fields.name) fields.name.value = '';
+  if (fields.description) fields.description.value = '';
+  if (fields.price) fields.price.value = '';
+  if (fields.duration) fields.duration.value = '';
+  if (fields.order) fields.order.value = '';
+  if (fields.active) fields.active.checked = true;
+  if (fields.title) fields.title.textContent = 'Novo serviço';
+}
+
+function fillServiceForm(service) {
+  appState.editingServiceId = service.id;
+  const name = document.getElementById('service-name');
+  const description = document.getElementById('service-description');
+  const price = document.getElementById('service-price');
+  const duration = document.getElementById('service-duration');
+  const order = document.getElementById('service-order');
+  const active = document.getElementById('service-active');
+  const title = document.getElementById('service-form-title');
+
+  if (name) name.value = service.name || '';
+  if (description) description.value = service.description || '';
+  if (price) price.value = service.price ?? '';
+  if (duration) duration.value = service.durationMinutes ?? '';
+  if (order) order.value = service.order ?? '';
+  if (active) active.checked = Boolean(service.active);
+  if (title) title.textContent = `Editando: ${service.name || 'serviço'}`;
+}
+
+window.resetServiceForm = clearServiceForm;
+window.clearServiceForm = clearServiceForm;
+window.editService = function(serviceId) {
+  const service = appState.adminServices.find(s => s.id === serviceId);
+  if (!service) return;
+  fillServiceForm(service);
+};
+
+window.removeService = async function(serviceId) {
+  if (!confirm('Tem certeza que deseja apagar este serviço?')) return;
+
+  try {
+    await deleteService(serviceId);
+    showToast('âœ“ Serviço apagado');
+    appState.adminServices = appState.adminServices.filter(s => s.id !== serviceId);
+    renderServiceAdminList();
+    if (appState.editingServiceId === serviceId) {
+      clearServiceForm();
+    }
+  } catch (e) {
+    showToast('âœ— ' + e.message);
+  }
+};
+
+window.saveServiceFromForm = async function() {
+  try {
+    if (!appState.currentUser || appState.currentUser.role !== 'admin') {
+      showToast('âœ— Apenas administradores podem salvar serviços');
+      return;
+    }
+
+    const payload = {
+      name: document.getElementById('service-name')?.value,
+      description: document.getElementById('service-description')?.value,
+      price: document.getElementById('service-price')?.value,
+      durationMinutes: document.getElementById('service-duration')?.value,
+      order: document.getElementById('service-order')?.value,
+      active: document.getElementById('service-active')?.checked
+    };
+
+    if (appState.editingServiceId) {
+      await updateService(appState.editingServiceId, payload);
+      showToast('âœ“ Serviço atualizado');
+    } else {
+      const result = await createService(payload);
+      appState.editingServiceId = result.id;
+      showToast('âœ“ Serviço criado');
+    }
+
+    appState.adminServices = await getAllServices();
+    renderServiceAdminList();
+    clearServiceForm();
+    if (document.querySelector('#screen-booking.active')) {
+      await initBookingScreen();
+    }
+  } catch (e) {
+    showToast('âœ— ' + e.message);
+  }
+};
+
+window.showServicesPanel = showServicesPanel;
 
 // UTILS
 // ════════════════════════════════════
